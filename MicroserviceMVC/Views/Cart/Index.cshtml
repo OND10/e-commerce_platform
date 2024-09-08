@@ -1,0 +1,119 @@
+﻿@using eCommerceWebMVC.Models.DTOs.CartDTOs.Request
+@model CartDto
+@if (Model.CartHeaderResponse != null && Model.CartDetailsResponse?.Count() > 0)
+{
+
+    @if (TempData.ContainsKey("msg"))
+    {
+        <div class="alert alert-sucess">@TempData["msg"]</div>
+    }
+
+
+    <form method="Post" asp-action="EmailCart">
+        <input hidden asp-for="CartHeaderResponse.UserId" />
+        <input hidden asp-for="CartHeaderResponse.Id" />
+        <br />
+        <div class="">
+            <div class="card border pt-3 mt-4 container">
+                <div class="col-6">
+                    <h3 class="text-success"><i class="bi bi-cart"></i>&nbsp;Shopping Cart</h3>
+                </div>
+                <div class="col-12 text-end">
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-outline-warning mt-1 btn-sm"> Continue Shopping</a>
+                </div>
+                <hr />
+                <div class="card-body">
+                    <div class="d-none d-lg-block">
+                        <div class="row text-info">
+                            <div class="col-lg-2 ms-5">
+                                Image
+                            </div>
+                            <div class="col-lg-4">
+                                Product Details
+                            </div>
+                            <div class="col-lg-2">
+                                Price
+                            </div>
+                            <div class="col-lg-2">
+                                Count
+                            </div>
+                            <div class="col-lg-1">
+                                Actions
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    @foreach (var cart in Model.CartDetailsResponse)
+                    {
+                        <div class="row h-100">
+                            <div class="col-4 col-md-2 text-center py-2">
+                                @if (cart.Product.ImageUrl != null)
+                                {
+                                    <img src="~/@Html.DisplayFor(modelitem => cart.Product.ImageUrl)" width="100%" class="rounded" />
+                                }
+                                else
+                                {
+                                    <p>NO Image</p>
+                                }
+                            </div>
+                            <div class="col-8 col-md-5 ">
+                                <h5>@cart.Product.Name</h5>
+                                <div style="font-size:11px;">@Html.Raw(cart.Product.Description)</div>
+                            </div>
+                            <div class="col-3 col-md-2 pt-md-4" style="font-size:11px;">
+                                <span style="font-size:17px;">@string.Format("{0:c}", cart.Product.Price)</span>
+                            </div>
+                            <div class="col-3 col-md-2 pt-md-4" style="font-size:11px;">
+                                <span style="font-size:17px;">@cart.Count</span>
+                            </div>
+                            <div class="col-2 col-lg-1 p0 pt-lg-4 text-center">
+                                <a asp-action="Delete" asp-route-cartDetailsId="@cart.Id" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                    <hr />
+                    <div class="row">
+                        <div class="col-6">
+                            @if (string.IsNullOrEmpty(Model.CartHeaderResponse.CouponCode))
+                            {
+                                <span>Coupon : </span>
+                                <input asp-for="CartHeaderResponse.CouponCode" />
+                                <button asp-action="ApplyCoupon" type="submit" class="btn btn-sm btn-success">Apply</button>
+                            }
+                            else
+                            {
+
+                                <span>Coupon : </span>
+                                <input asp-for="CartHeaderResponse.CouponCode" disabled />
+                                <button asp-action="RemoveCoupon" type="submit" class="btn btn-sm btn-success">Remove</button>
+                            }
+                        </div>
+                        <div class="col-6 text-end">
+                            <span class="text-danger" style="font-size:18px;">Order Total : @string.Format("{0:c}",  Model.CartHeaderResponse.CartTotal)<br /></span>
+                            @if (Model.CartHeaderResponse.Discount > 0)
+                            {
+                                <span class="text-success">Order Discount : @string.Format("{0:c}", Model.CartHeaderResponse.Discount)</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer row">
+                    <div class="col-6 col-md-3">
+                        <button type="submit" class="btn btn-outline-danger form-control ">Email Cart</button>
+                    </div>
+                    <div class="col-6 col-md-3 offset-md-6">
+                        <a asp-action="Checkout" class="btn btn-success form-control">CheckOut</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+else
+{
+    <div>
+        <p>You need to add items to Cart</p>
+    </div>
+}

@@ -1,0 +1,8 @@
+# We have a solution explorer which contains Frontend Folder that may be your mvc project
+# which will call your microservice
+# Inside folder service we will add all our different microservices.
+# Services folder is very important
+# 5248 is the port of the Coupon api server
+# Coupon api will be responsible for handling crud operations on the coupon model.
+# Microservice is composed of an individual API.
+# Working on how APIs communicate with each other.

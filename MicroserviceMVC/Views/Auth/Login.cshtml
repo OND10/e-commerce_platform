@@ -1,0 +1,91 @@
+﻿@using eCommerceWebMVC.Models.DTOs.AuthDTOs.Request
+@model LoginRequestDTO
+
+
+@if (TempData.ContainsKey("msg"))
+{
+    <div class="alert alert-primary text-center">@TempData["msg"]</div>
+}
+@if (TempData.ContainsKey("error"))
+{
+    <div class="alert alert-primary text-center">@TempData["error"]</div>
+}
+
+<style>
+    divider.a-divider-break {
+        text-align: center;
+        position: relative;
+        top: 2px;
+        padding-top: 1px;
+        margin-bottom: 14px;
+        line-height: 0;
+    }
+
+    .auth-no-skin .a-button:not(.a-button-toggle) {
+        border-radius: 8px;
+        box-shadow: 0 2px 5px 0 rgba(213, 217, 217, .5);
+    }
+
+    .auth-no-skin .a-button {
+        background: #FFF;
+        border-color: #D5D9D9;
+    }
+
+    .a-button-span12 {
+        width: 35% !important;
+        margin-left:340px;
+    }
+
+    .a-button {
+        background: #e7e9ec;
+        border-radius: 3px;
+        border-color: #adb1b8 #a2a6ac #8d9096;
+        border-style: solid;
+        border-width: 1px;
+        cursor: pointer;
+        display: inline-block;
+        padding: 0;
+        text-align: center;
+        text-decoration: none !important;
+        vertical-align: middle;
+    }
+    a{
+        color : #000;
+        text-decoration: none;
+    }
+</style>
+
+<form asp-action="Login" method="Post">
+    <div class="container border p-4">
+        <div class="row text-center">
+            <h1>Login</h1>
+        </div>
+        <div class="row text-center">
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6 offset-md-3 pb-2">
+                <input asp-for="UserName" class="form-control" placeholder="UserName"/>
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6 offset-md-3 pb-2">
+                <input asp-for="Password" class="form-control" placeholder="*******" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6 offset-md-3 pb-2">
+                <button type="submit" class="form-control btn btn-success" value="submit">Login</button>
+            </div>
+            <div class="text-center"><h5 aria-level="5">New to OND?</h5></div>
+            <span id="auth-create-account-link" class="a-button a-button-span12 a-button-base">
+                <span class="a-button-inner">
+                    <a asp-action="Register" id="createAccountSubmit" class="a-button-text">
+                        Create your OND account
+                    </a>
+                </span>
+            </span>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

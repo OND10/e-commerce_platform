@@ -1,0 +1,100 @@
+﻿@using eCommerceWebMVC.Models.DTOs.CartDTOs.Request
+@model CartDto
+
+@if (Model.CartHeaderResponse != null && Model.CartDetailsResponse?.Count() > 0)
+{
+    <form method="post" asp-action="Checkout">
+        <input asp-for="CartHeaderResponse.UserId" hidden />
+        <input asp-for="CartHeaderResponse.Id" hidden />
+        <input asp-for="CartHeaderResponse.CouponCode" hidden />
+        <input asp-for="CartHeaderResponse.Discount" hidden />
+        <input asp-for="CartHeaderResponse.CartTotal" hidden />
+        <div class="border mt-2 p-4 rounded">
+            <div class="container row">
+                <div class="col-md-7 col-12">
+                    <span style="font-size:25px;" class="text-warning mb-2">Order Summary</span>
+                </div>
+                <div class="col-md-5 col-12">
+                    <a asp-action="Index" class="btn btn-outline-warning form-control">Back to Cart</a>
+                </div>
+                <br /><br /><br />
+                <hr />
+                <div class="col-7">
+                    <div class="row pt-2">
+                        <div class="col-12 pt-2">
+                            <input asp-for="CartHeaderResponse.Name" placeholder="Full Name .." class="form-control" />
+                            <span asp-validation-for="CartHeaderResponse.Name"></span>
+                        </div>
+                        <div class="col-12 pt-2">
+                            <input asp-for="CartHeaderResponse.Email" placeholder="Email .." class="form-control" />
+                            <span asp-validation-for="CartHeaderResponse.Email"></span>
+                        </div>
+                        <div class="col-12 pt-2">
+                            <input asp-for="CartHeaderResponse.PhoneNumber" placeholder="PhoneNumber .." class="form-control" />
+                            <span asp-validation-for="CartHeaderResponse.PhoneNumber"></span>
+                        </div>
+                        <div class="col-12 pt-2">
+                            <label class="col-form-label">Order will be in 30 minutes after placing the order. </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5">
+                    <div class="card mt-2">
+                        <div class="card-body">
+                            <div class="d-none d-lg-block">
+                                <div class="row text-danger">
+                                    <div class="col-6">
+                                        Product Details
+                                    </div>
+                                    <div class="col-3">
+                                        Price
+                                    </div>
+                                    <div class="col-3">
+                                        Count
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            @foreach (var item in Model.CartDetailsResponse)
+                            {
+                                <div class="row h-100">
+                                    <div class="col-6">
+                                        <span style="font-size:20px;">@item.Product.Name</span>
+                                    </div>
+                                    <div class="col-3" style="font-size:11px;">
+                                        <span style="font-size:17px;">@item.Product.Price.ToString("c")</span>
+                                    </div>
+                                    <div class="col-3">
+                                        <span style="font-size:17px;">@item.Count</span>
+                                    </div>
+                                </div>
+                            }
+                            <hr />
+                            <div class="row">
+                                <div class="col-12 text-center pr-4 text-danger">
+                                    Order Total : @Model.CartHeaderResponse.CartTotal.ToString("c") <br />
+                                    @if (Model.CartHeaderResponse.Discount > 0)
+                                    {
+                                        <span class="text-success"> Order Discount : @Model.CartHeaderResponse.Discount.ToString("c")</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success form-control">
+                                        <span>Place Order</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

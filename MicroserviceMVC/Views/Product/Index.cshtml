@@ -1,0 +1,92 @@
+﻿@using eCommerceWebMVC.Models.DTOs.ProductDTOs.Response
+@model List<ProductResponseDto>
+
+
+@if (TempData.ContainsKey("msg"))
+{
+    <div class="alert alert-primary">@TempData["msg"]</div>
+}
+@if (TempData.ContainsKey("error"))
+{
+    <div class="alert alert-primary">@TempData["error"]</div>
+}
+
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">Product List</h1>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pb-3">
+            <div class="col-6"></div>
+            <div class="col-6 text-end">
+                <a asp-action="Create" asp-controller="Product" class="btn btn-outline-primary"><i class="bi bi-plus-square"></i>Create New Product</a>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                    <th>NumberofProduct</th>
+                    <th>Category</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model is not null)
+                {
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Price</td>
+                            <td>@item.Description</td>
+                            <td>@item.NumberofProduct</td>
+                            <td>@item.Category</td>
+                            @if (item.ImageUrl != null)
+                            {
+                                <td><img height="60" width="50" src="@Html.DisplayFor(modelitem => item.ImageUrl)" alt="" class="img-fluid img-20"></td>
+                            }
+                            else
+                            {
+                                <td><p>Image</p></td>
+                            }
+
+                            <td>
+
+                                <a asp-action="Edit" asp-route-Id="@item.Id" class="btn btn-secondary"><i class="bi bi-pencil-square"></i></a>
+                                <a asp-action="Generatecode" asp-route-Id="@item.Id" class="btn btn-success"><i class="bi bi-qr-code"></i></a>
+                                <a asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var deleteButton = document.getElementById("delete");
+    if (deleteButton) {
+        deleteButton.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevents the default action of the link (redirecting)
+            var confirmation = window.confirm("Are you sure you want to delete this item?");
+            if (confirmation) {
+                // If user confirms, proceed with the delete action
+                window.location.href = deleteButton.getAttribute("href");
+            } else {
+                // If user cancels, do nothing
+                window.alert("Deletion canceled.");
+            }
+        });
+    }
+</script>

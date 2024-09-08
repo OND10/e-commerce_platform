@@ -1,0 +1,77 @@
+﻿@using eCommerceWebMVC.Models.DTOs.CouponDTOs.Response
+@model List<CouponResponseDTO>
+
+
+@if (TempData.ContainsKey("msg"))
+{
+    <div class="alert alert-primary">@TempData["msg"]</div>
+}
+@if (TempData.ContainsKey("error"))
+{
+    <div class="alert alert-primary">@TempData["error"]</div>
+}
+
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="text-white">Coupons List</h1>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pb-3">
+            <div class="col-6"></div>
+            <div class="col-6 text-end">
+                <a asp-action="Create" asp-controller="Coupon" class="btn btn-outline-primary"><i class="bi bi-plus-square"></i>Create New Coupon</a>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Coupon Code</th>
+                    <th>Discount Amount</th>
+                    <th>Minimum Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model is not null)
+                {
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.CouponCode</td>
+                            <td>@item.DiscountAmount</td>
+                            <td>@item.MinAmount</td>
+                            <td>
+                                <a id="delete" asp-route-Id="@item.CouponId" asp-action="Delete" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var deleteButton = document.getElementById("delete");
+    if (deleteButton) {
+        deleteButton.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevents the default action of the link (redirecting)
+            var confirmation = window.confirm("Are you sure you want to delete this item?");
+            if (confirmation) {
+                // If user confirms, proceed with the delete action
+                window.location.href = deleteButton.getAttribute("href");
+            } else {
+                // If user cancels, do nothing
+                window.alert("Deletion canceled.");
+            }
+        });
+    }
+</script>
