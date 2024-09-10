@@ -87,5 +87,32 @@ namespace Auth.API.Repository.Implementations
             var result = await _userManager.GetRolesAsync(user);
             return result;
         }
+
+        public async Task<IList<string>>GetUserRolesAsync(string userId)
+        {
+
+            //Old code take to much to query form DB even slows the performance
+            //var userRolesList = new List<string>();
+            //var userRole = await _context.UserRoles.Where(u => u.UserId == userId).ToListAsync();
+
+            //foreach (var role in userRole)
+            //{
+            //    var roles = await _context.Roles.Where(r => r.Id == role.RoleId).ToListAsync();
+            //    foreach(var item in roles)
+            //    {
+            //        userRolesList.Add(item.Name);
+            //    }
+            //}
+
+            // a good way to return userRoles with high performance and scalability.
+            var userRoles = await (from ur in _context.UserRoles
+                                   join r in _context.Roles on ur.RoleId equals r.Id
+                                   where ur.UserId == userId
+                                   select r.Name)
+                                  .ToListAsync();
+
+            return userRoles;
+        }
+
     }
 }

@@ -25,7 +25,7 @@ namespace Order.API.Features.Orders
         }
 
         [Authorize]
-        [HttpGet("GetOrder")]
+        [HttpGet("GetOrders")]
         public async Task<Result<IEnumerable<OrderHeaderResponseDto>>>Get(string? userId = "", CancellationToken cancellationToken = default)
         {
             if(User.IsInRole("Admin"))

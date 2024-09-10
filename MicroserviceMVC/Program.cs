@@ -16,7 +16,6 @@ using MicroserviceMVC.Service.CouponServices.Interface;
 using MicroserviceMVC.Service.WebServices.Implementation;
 using MicroserviceMVC.Service.WebServices.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,10 +60,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+
+app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

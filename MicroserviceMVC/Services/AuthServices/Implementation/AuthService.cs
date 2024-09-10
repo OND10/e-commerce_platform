@@ -46,6 +46,32 @@ namespace eCommerceWebMVC.Services.AuthServices.Implementation
             return await Result<bool>.FaildAsync(false, result.Message);
         }
 
+        public async Task<Result<IList<string>>> GetUserRolesAsync(string userId)
+        {
+            var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
+            {
+                apiType = HttpMethodType.ApiType.Get,
+                Url = $"{HttpMethodType.AuthAPIBase}/api/auth/GetUserRoles/{userId}",
+            });
+
+            if (result.IsSuccess)
+            {
+                if (result.Response.Data is not null)
+                {
+                    var data = JsonConvert.DeserializeObject<IList<string>>(result.Response.Data.ToString());
+                    return await Result<IList<string>>.SuccessAsync(data, result.Message, true);
+                }
+                else
+                {
+                    return await Result<IList<string>>.FaildAsync(false, "result.Response.Data is null");
+                }
+            }
+            else
+            {
+                return await Result<IList<string>>.FaildAsync(false, result.Message);
+            }
+        }
+
         public async Task<Result<LoginResponseDTO>> Login(LoginRequestDTO request)
         {
             var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest

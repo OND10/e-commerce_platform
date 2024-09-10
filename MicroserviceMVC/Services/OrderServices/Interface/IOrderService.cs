@@ -10,5 +10,9 @@ namespace eCommerceWebMVC.Services.OrderServices.Interface
         Task<Result<OrderHeaderResponseDto>> CreatAsync(CartDto model);
         Task<Result<StripeRequestDto>> CreateStripeSession(StripeRequestDto model);
         Task<Result<OrderHeaderResponseDto>> VerifyStripeSession(int orderHeaderId);
+        Task<Result<bool>> UpdateOrderStatus(int orderId, string newStatus);
+        Task<Result<IEnumerable<OrderHeaderResponseDto>>> GetAllOrders(string? userId);
+        Task<Result<OrderHeaderResponseDto>> GetOrderById(int orderId);
+
     }
 }

@@ -61,5 +61,18 @@ namespace Auth.API.Controllers
             return await Result<bool>.SuccessAsync(result.Data, "Role is Added Successfully", true);
         }
 
+        [HttpGet("GetUserRoles/{userId}")]
+        public async Task<Result<IList<string>>> Get(string userId) 
+        { 
+            var response = await _authService.GetUserRolesAsync(userId);
+
+            if(response.IsSuccess)
+            {
+                return await Result<IList<string>>.SuccessAsync(response.Data, "Get all Roles Successfully", true);
+            }
+
+            return await Result<IList<string>>.FaildAsync(false, "Operation faild in fetching Roles");
+        }
+
     }
 }

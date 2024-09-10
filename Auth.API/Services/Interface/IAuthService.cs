@@ -10,6 +10,8 @@ namespace Auth.API.Services.Interface
         Task<Result<LoginResponseDTO>> Login(LoginRequestDTO request);
         Task<Result<UserDTO>> Register(RegisterRequestDTO request);
         Task<Result<bool>> AddUserToRole(UserRoleRequestDTO request);
-        
+        Task<Result<IList<string>>> GetUserRolesAsync(string userId);
+
+
     }
 }

@@ -29,6 +29,17 @@ namespace Auth.API.Services.Implementation
             return await Result<bool>.FaildAsync(false, "Role is Created Successfully");
         }
 
+        public async Task<Result<IList<string>>> GetUserRolesAsync(string userId)
+        {
+            var result = await _repository.GetUserRolesAsync(userId);
+            if(result.Count > 0)
+            {
+                return await Result<IList<string>>.SuccessAsync(result, "Get all Roles Successfully", true);
+            }
+
+            return await Result<IList<string>>.FaildAsync(false, "Operation faild in fetching Roles");
+        }
+
         public async Task<Result<LoginResponseDTO>> Login(LoginRequestDTO request)
         {
             var mapper = new OnMapping();
@@ -82,6 +93,7 @@ namespace Auth.API.Services.Implementation
             }
             return await Result<UserDTO>.FaildAsync(false, $"{result.Errors}");
         }
+
     }
 
     

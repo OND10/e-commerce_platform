@@ -15,5 +15,6 @@ namespace Auth.API.Contract.Interfaces
         public Task<ApplicationUser> FindUserByIdAsync(string userId);
         public Task<ApplicationUser> FindUserByNameAsync(string userName);
         public Task<bool> AssignRoleToUser(string email, string roleName);
+        Task<IList<string>> GetUserRolesAsync(string userId);
     }
 }

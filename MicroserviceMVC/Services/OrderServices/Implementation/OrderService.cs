@@ -57,6 +57,85 @@ namespace eCommerceWebMVC.Services.OrderServices.Implementation
             }
         }
 
+        public async Task<Result<IEnumerable<OrderHeaderResponseDto>>> GetAllOrders(string? userId)
+        {
+            var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
+            {
+                apiType = HttpMethodType.ApiType.Get,
+                Url = $"{HttpMethodType.OrderAPIBase}/api/order/GetOrders/{userId}",
+            });
+
+            if (result.IsSuccess)
+            {
+                if (result.Response.Data is not null)
+                {
+                    var data = JsonConvert.DeserializeObject<IEnumerable<OrderHeaderResponseDto>>(result.Response.Data.ToString());
+                    return await Result<IEnumerable<OrderHeaderResponseDto>>.SuccessAsync(data, "Get All Orders Successfully", true);
+                }
+                else
+                {
+                    return await Result<IEnumerable<OrderHeaderResponseDto>>.FaildAsync(false, "result.Response.Data is null");
+                }
+            }
+            else
+            {
+                return await Result<IEnumerable<OrderHeaderResponseDto>>.FaildAsync(false, result.Message);
+            }
+        }
+
+        public async Task<Result<OrderHeaderResponseDto>> GetOrderById(int orderId)
+        {
+            var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
+            {
+                apiType = HttpMethodType.ApiType.Get,
+                Url = $"{HttpMethodType.OrderAPIBase}/api/order/GetOrder/{orderId}",
+            });
+
+            if (result.IsSuccess)
+            {
+                if (result.Response.Data is not null)
+                {
+                    var data = JsonConvert.DeserializeObject<OrderHeaderResponseDto>(result.Response.Data.ToString());
+                    return await Result<OrderHeaderResponseDto>.SuccessAsync(data, "Order is Found Successfully", true);
+                }
+                else
+                {
+                    return await Result<OrderHeaderResponseDto>.FaildAsync(false, "result.Response.Data is null");
+                }
+            }
+            else
+            {
+                return await Result<OrderHeaderResponseDto>.FaildAsync(false, result.Message);
+            }
+        }
+
+        public async Task<Result<bool>> UpdateOrderStatus(int orderId, string newStatus)
+        {
+            var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
+            {
+                apiType = HttpMethodType.ApiType.Post,
+                Url = $"{HttpMethodType.OrderAPIBase}/api/order/UpdateOrderStatus/{orderId}",
+                Data = newStatus
+            });
+
+            if (result.IsSuccess)
+            {
+                var responseData = result.Response.Data.ToString();
+                if (bool.TryParse(responseData, out var data))
+                {
+                    return await Result<bool>.SuccessAsync(data, "Order Status is updated Successfully", true);
+                }
+                else
+                {
+                    // Log or handle unexpected content
+                    Console.WriteLine("Unexpected response data format.");
+                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                }
+            }
+
+            return await Result<bool>.FaildAsync(false, result.Message);
+        }
+
         public async Task<Result<OrderHeaderResponseDto>> VerifyStripeSession(int orderHeaderId)
         {
             var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
