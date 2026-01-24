@@ -1,7 +1,8 @@
-﻿function loadDataTable() {
+﻿function loadDataTable(status) {
     dataTable = $('#tblData').DataTable({
+        order: [[0, 'desc']],
         "ajax": {
-            url: "/Order/GetAll",
+            url: "/Order/GetAll?status=" + status,
             type: "GET",
             dataSrc: "data",
             error: function (xhr, status, error) {
@@ -23,7 +24,7 @@
                 data: 'id',
                 "render": function (data) {
                     return `<div class = "w-75 btn-group" role="group">
-                    <a href ="/order/details?id=${data}" class="btn btn-primary mx-2"><i class="bi bi-pencil-square"></i></a>
+                    <a href ="/Order/Details?id=${data}" class="btn btn-primary mx-2"><i class="bi bi-pencil-square"></i></a>
                     </div>`
                 },
                 width: "100%"
@@ -32,7 +33,22 @@
     });
 }
 
-
 $(document).ready(function () {
-    loadDataTable();
+    var url = window.location.search;
+    if (url.includes("approved")) {
+        loadDataTable("approved");
+    }
+    else {
+        if (url.includes("readyforpickup")) {
+            loadDataTable("readyforpickup");
+        }
+        else {
+            if (url.includes("cancelled")) {
+                loadDataTable("cancelled");
+            }
+            else {
+                loadDataTable("all");
+            }
+        }
+    }
 });

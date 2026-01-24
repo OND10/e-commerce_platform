@@ -10,7 +10,7 @@ namespace Order.API.Features.Orders.Services.Implementation
         public override Task<CartDto> ProcessOrder(CartDto cart)
         {
 
-            if(cart.CartHeaderResponse.Discount > 0 && !string.IsNullOrEmpty(cart.CartHeaderResponse.Name))
+            if(!string.IsNullOrEmpty(cart.CartHeaderResponse.Name))
             {
                 cart.CartHeaderResponse.isValid = true;
             }

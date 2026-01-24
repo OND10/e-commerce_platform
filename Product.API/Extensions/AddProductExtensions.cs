@@ -14,33 +14,36 @@ namespace Product.API.Extensions
         {
 
             //Adding Authentication to the Application Pipeline
-            var secrect = builder.Configuration.GetValue<string>("ApiSettings:Secret");
-            var issuer = builder.Configuration.GetValue<string>("ApiSettings:Issuer");
-            var audience = builder.Configuration.GetValue<string>("ApiSettings:Audience");
+            var jwtSecret = builder.Configuration["ApiSettings:Secret"];
+            var jwtIssuer = builder.Configuration["ApiSettings:Issuer"];
+            var jwtAudience = builder.Configuration["ApiSettings:Audience"];
 
-            //Adding the key of the SymmetricSecurityKey
-            var key = Encoding.ASCII.GetBytes(secrect);
-
-            builder.Services.AddAuthentication(a =>
+            builder.Services.AddAuthentication(options =>
             {
-                a.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                a.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(a =>
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
             {
-                a.TokenValidationParameters = new TokenValidationParameters
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
                     ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
                 };
             });
+
 
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IUnitofWork, UnitofWork>();
             builder.Services.AddScoped<OnMapping>();
+            builder.Services.AddAutoMapper(typeof(Program));
             var assembly = Assembly.GetExecutingAssembly();
             builder.Services.AddMediatR(cfg =>
             {

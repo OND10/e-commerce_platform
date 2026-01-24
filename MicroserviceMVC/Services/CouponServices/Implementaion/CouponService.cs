@@ -29,11 +29,11 @@ namespace MicroserviceMVC.Service.CouponServices.Implementaion
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<CouponResponseDTO>(result.Response.Data.ToString());
-                return await Result<CouponResponseDTO>.SuccessAsync(data, "Created Successfully", true);
+                return Result<CouponResponseDTO>.Success(data, "Created Successfully", true);
             }
             else
             {
-                return await Result<CouponResponseDTO>.FaildAsync(false, result.Message);
+                return Result<CouponResponseDTO>.Faild(false, result.Message);
             }
             //return await Result<CouponResponseDTO>.SuccessAsync(, "Added Successfully", true);
         }
@@ -51,17 +51,17 @@ namespace MicroserviceMVC.Service.CouponServices.Implementaion
                 var responseData = result.Response.Data.ToString();
                 if (bool.TryParse(responseData, out var data))
                 {
-                    return await Result<bool>.SuccessAsync(data, "Deleted Successfully", true);
+                    return Result<bool>.Success(data, "Deleted Successfully", true);
                 }
                 else
                 {
                     // Log or handle unexpected content
                     Console.WriteLine("Unexpected response data format.");
-                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                    return Result<bool>.Faild(false, "Unexpected response data format.");
                 }
 
             }
-            return await Result<bool>.FaildAsync(false, result.Message);
+            return Result<bool>.Faild(false, result.Message);
         }
 
         public async Task<Result<IEnumerable<CouponResponseDTO>>> GetAllAsync()
@@ -75,11 +75,11 @@ namespace MicroserviceMVC.Service.CouponServices.Implementaion
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<IEnumerable<CouponResponseDTO>>(result.Response.Data.ToString());
-                return await Result<IEnumerable<CouponResponseDTO>>.SuccessAsync(data, "Viewed Successfully", true);
+                return Result<IEnumerable<CouponResponseDTO>>.Success(data, "Viewed Successfully", true);
             }
             else
             {
-                return await Result<IEnumerable<CouponResponseDTO>>.FaildAsync(false, result.Message);
+                return Result<IEnumerable<CouponResponseDTO>>.Faild(false, result.Message);
             }
         }
 
@@ -93,10 +93,10 @@ namespace MicroserviceMVC.Service.CouponServices.Implementaion
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<CouponResponseDTO>(result.Response.Data.ToString());
-                return await Result<CouponResponseDTO>.SuccessAsync(data, "Found Successfully", true);
+                return Result<CouponResponseDTO>.Success(data, "Found Successfully", true);
             }
 
-            return await Result<CouponResponseDTO>.FaildAsync(false, result.Message);
+            return Result<CouponResponseDTO>.Faild(false, result.Message);
         }
 
         public async Task<Result<CouponResponseDTO>> GetByIdAsync(int id)
@@ -109,10 +109,10 @@ namespace MicroserviceMVC.Service.CouponServices.Implementaion
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<CouponResponseDTO>(result.Response.Data.ToString());
-                return await Result<CouponResponseDTO>.SuccessAsync(data, "Found Successfully", true);
+                return Result<CouponResponseDTO>.Success(data, "Found Successfully", true);
             }
 
-            return await Result<CouponResponseDTO>.FaildAsync(false, result.Message);
+            return Result<CouponResponseDTO>.Faild(false, result.Message);
         }
 
         public async Task<Result<CouponResponseDTO>> UpdateAsync(int id, CouponRequestDTO model)
@@ -127,11 +127,11 @@ namespace MicroserviceMVC.Service.CouponServices.Implementaion
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<CouponResponseDTO>(result.Response.Data.ToString());
-                return await Result<CouponResponseDTO>.SuccessAsync(data, "Updated Successfully", true);
+                return Result<CouponResponseDTO>.Success(data, "Updated Successfully", true);
             }
             else
             {
-                return await Result<CouponResponseDTO>.FaildAsync(false, result.Message);
+                return Result<CouponResponseDTO>.Faild(false, result.Message);
             }
         }
     }

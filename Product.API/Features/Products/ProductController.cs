@@ -34,6 +34,7 @@ namespace Product.API.Features.Products
         {
             var command = new GetProductQuery();
             var result = await _sender.Send(command, cancellationToken);
+            //result.Data = null;
             return await Result<IEnumerable<ProductResponseDto>>.SuccessAsync(result.Data, "Viewed Successfully", true);
         }
 

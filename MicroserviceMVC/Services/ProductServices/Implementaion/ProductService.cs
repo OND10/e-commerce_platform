@@ -16,23 +16,23 @@ namespace eCommerceWebMVC.Services.ProductServices.Implementaion
         {
             _baseService = baseService;
         }
-        public async Task<Result<ProductResponseDto>> CreaAsync(ProductRequestDto model)
+        public async Task<Result<ProductResponseDto>> CreatAsync(ProductRequestDto model)
         {
             var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
             {
                 apiType = ApiType.Post,
-                Url = $"{HttpMethodType.ProductAPIBase}/api/product/",
+                Url = $"{HttpMethodType.ProductAPIBase}/api/product",
                 Data = model
             });
 
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<ProductResponseDto>(result.Response.Data.ToString());
-                return await Result<ProductResponseDto>.SuccessAsync(data, "Created Successfully", true);
+                return Result<ProductResponseDto>.Success(data, "Created Successfully", true);
             }
             else
             {
-                return await Result<ProductResponseDto>.FaildAsync(false, result.Message);
+                return Result<ProductResponseDto>.Faild(false, result.Message);
             }
 
         }
@@ -50,17 +50,17 @@ namespace eCommerceWebMVC.Services.ProductServices.Implementaion
                 var responseData = result.Response.Data.ToString();
                 if (bool.TryParse(responseData, out var data))
                 {
-                    return await Result<bool>.SuccessAsync(data, "Deleted Successfully", true);
+                    return  Result<bool>.Success(data, "Deleted Successfully", true);
                 }
                 else
                 {
                     // Log or handle unexpected content
                     Console.WriteLine("Unexpected response data format.");
-                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                    return Result<bool>.Faild(false, "Unexpected response data format.");
                 }
 
             }
-            return await Result<bool>.FaildAsync(false, result.Message);
+            return Result<bool>.Faild(false, result.Message);
         }
 
         public async Task<Result<IEnumerable<ProductResponseDto>>> GetAllAsync()
@@ -68,17 +68,21 @@ namespace eCommerceWebMVC.Services.ProductServices.Implementaion
             var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
             {
                 apiType = HttpMethodType.ApiType.Get,
-                Url = $"{HttpMethodType.ProductAPIBase}/api/product/"
+                Url = $"{HttpMethodType.ProductAPIBase}/api/products"
             }, withBearer: true);
 
             if (result.IsSuccess)
             {
-                var data = JsonConvert.DeserializeObject<IEnumerable<ProductResponseDto>>(result.Response.Data.ToString());
-                return await Result<IEnumerable<ProductResponseDto>>.SuccessAsync(data, "Viewed Successfully", true);
+                if (result.Response.Data is not null)
+                {
+                    var data = JsonConvert.DeserializeObject<IEnumerable<ProductResponseDto>>(result.Response.Data.ToString());
+                    return  Result<IEnumerable<ProductResponseDto>>.Success(data, "Viewed Successfully", true);
+                }
+                return  Result<IEnumerable<ProductResponseDto>>.Success("Passed without data", true);
             }
             else
             {
-                return await Result<IEnumerable<ProductResponseDto>>.FaildAsync(false, result.Message);
+                return  Result<IEnumerable<ProductResponseDto>>.Faild(false, result.Message);
             }
         }
 
@@ -87,15 +91,15 @@ namespace eCommerceWebMVC.Services.ProductServices.Implementaion
             var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
             {
                 apiType = HttpMethodType.ApiType.Get,
-                Url = $"{HttpMethodType.ProductAPIBase}/api/product/{id}"
+                Url = $"{HttpMethodType.ProductAPIBase}/api/products/{id}"
             });
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<ProductResponseDto>(result.Response.Data.ToString());
-                return await Result<ProductResponseDto>.SuccessAsync(data, "Found Successfully", true);
+                return Result<ProductResponseDto>.Success(data, "Found Successfully", true);
             }
 
-            return await Result<ProductResponseDto>.FaildAsync(false, result.Message);
+            return Result<ProductResponseDto>.Faild(false, result.Message);
         }
 
         public async Task<Result<ProductResponseDto>> UpdateAsync(int id, ProductRequestDto model)
@@ -103,18 +107,18 @@ namespace eCommerceWebMVC.Services.ProductServices.Implementaion
             var result = await _baseService.SendAsync(new eCommerceWebMVC.Shared.HttpRequest
             {
                 apiType = ApiType.Put,
-                Url = $"{HttpMethodType.ProductAPIBase}/api/product/{id}",
+                Url = $"{HttpMethodType.ProductAPIBase}/api/products/{id}",
                 Data = model
             });
 
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<ProductResponseDto>(result.Response.Data.ToString());
-                return await Result<ProductResponseDto>.SuccessAsync(data, "Updated Successfully", true);
+                return Result<ProductResponseDto>.Success(data, "Updated Successfully", true);
             }
             else
             {
-                return await Result<ProductResponseDto>.FaildAsync(false, result.Message);
+                return Result<ProductResponseDto>.Faild(false, result.Message);
             }
         }
     }

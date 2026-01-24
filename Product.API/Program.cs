@@ -39,6 +39,7 @@ builder.Services.AddSwaggerGen(options =>
 //Adding dependencies to the Application Pipeline
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
+    var connectionString = builder.Configuration.GetConnectionString("defaultConnectionString");
     options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnectionString"));
 });
 

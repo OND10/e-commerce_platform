@@ -3,6 +3,7 @@ using MessageBus.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Order.API.Common;
 using Order.API.Common.Enum;
 using Order.API.Common.Handler;
 using Order.API.DataBase;
@@ -17,9 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BackendAPIAuthenticationHttpClientHandler>();
 //Adding Product Service to make tasking works propeply
-builder.Services.AddHttpClient("Product", u => u.BaseAddress =
-    new Uri(builder.Configuration["ServiceUrls:ProductAPI"])
-).AddHttpMessageHandler<BackendAPIAuthenticationHttpClientHandler>();
+builder.Services
+    .AddHttpClient("Product", client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]);
+    })
+    .AddHttpMessageHandler<BackendAPIAuthenticationHttpClientHandler>()
+    .AddPolicyHandler(PolicyConfig.GetRetryPolicy())
+    .AddPolicyHandler(PolicyConfig.GetCircuitBreakerPolicy());
 builder.Services.AddScoped<IMessageBusService, MessageBusService>();
 HttpMethodType.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"];
 builder.Services.AddControllers();

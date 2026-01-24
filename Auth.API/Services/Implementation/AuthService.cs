@@ -5,6 +5,7 @@ using Auth.API.Models.DTOs;
 using Auth.API.Models.DTOs.Request;
 using Auth.API.Models.DTOs.Response;
 using Auth.API.Services.Interface;
+using MessageBus.Services;
 using OnMapper;
 
 namespace Auth.API.Services.Implementation
@@ -13,10 +14,18 @@ namespace Auth.API.Services.Implementation
     {
         private readonly IUserManagerRepository _repository;
         private readonly ITokenRepository _trepository;
-        public AuthService(IUserManagerRepository repository, ITokenRepository trepository)
+        private readonly IConfiguration _configuration;
+        private readonly IMessageBusService _messageBus;
+        public AuthService(
+            IUserManagerRepository repository, 
+            ITokenRepository trepository, 
+            IConfiguration configuration,
+            IMessageBusService messageBus)
         {
             _repository = repository;
             _trepository = trepository;
+            _configuration = configuration;
+            _messageBus = messageBus;
         }
 
         public async Task<Result<bool>> AddUserToRole(UserRoleRequestDTO request)
@@ -88,7 +97,12 @@ namespace Auth.API.Services.Implementation
                 /// Here I should use mapping but still I am in debugging mode.
                 ///
                 var userMappedResult = await mapper.Map<ApplicationUser, UserDTO>(userReturn);
-                
+
+                // Publish the message to the Service Bus. 
+
+                await _messageBus.PublishMessage(userReturn.Email, _configuration.GetValue<string>("TopicAndQueueNames:UserLoggingQueue"));
+
+
                 return await Result<UserDTO>.SuccessAsync(userMappedResult.Data, "Registered Successfully", true);
             }
             return await Result<UserDTO>.FaildAsync(false, $"{result.Errors}");

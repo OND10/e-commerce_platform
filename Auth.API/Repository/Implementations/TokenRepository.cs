@@ -51,10 +51,11 @@ namespace Auth.API.Repository.Implementations
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Audience = _jWtoptions.Audience,
                 Issuer = _jWtoptions.Issuer,
+                Audience = _jWtoptions.Audience,
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
+                NotBefore = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddMinutes(int.Parse(_jWtoptions.ExpiryMinutes)),
                 SigningCredentials = credentails
             };
 

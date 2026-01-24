@@ -48,7 +48,7 @@ namespace Order.API.Features.Orders
             {
                 var query = new GetOrderQuery
                 {
-                    Role = "User",
+                    Role = "CUSTOMER",
                     userId = userId
                 };
 

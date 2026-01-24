@@ -43,17 +43,17 @@ namespace MicroserviceMVC.Service.WebServices.Implementation
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return await Result<eCommerceWebMVC.Shared.HttpResponse>.FaildAsync(false, response.ReasonPhrase);
+                    return Result<eCommerceWebMVC.Shared.HttpResponse>.Faild(false, response.ReasonPhrase, (int)response.StatusCode);
                 }
 
                 var apiContent = await response.Content.ReadAsStringAsync();
                 var apiResponseDto = JsonConvert.DeserializeObject<eCommerceWebMVC.Shared.HttpResponse>(apiContent);
 
-                return await Result<eCommerceWebMVC.Shared.HttpResponse>.SuccessAsync(apiResponseDto, "Executed Successfully", true);
+                return Result<eCommerceWebMVC.Shared.HttpResponse>.Success(apiResponseDto, "Executed Successfully", true);
             }
             catch (Exception ex)
             {
-                return await Result<eCommerceWebMVC.Shared.HttpResponse>.FaildAsync(false, $"{ex.Message}");
+                return Result<eCommerceWebMVC.Shared.HttpResponse>.Faild(false, $"{ex.Message}");
             }
         }
         //public async Task<Result<ResponseDTO>> SendGetAllAsync(RequestDTO request)

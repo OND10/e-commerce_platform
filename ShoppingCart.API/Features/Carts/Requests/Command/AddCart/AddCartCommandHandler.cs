@@ -32,9 +32,10 @@ namespace ShoppingCart.API.Features.Carts.Requests.Command.AddCart
                     await _context.SaveChangesAsync();
                     request.CartDetailsResponse.First().CartHeaderId = cartHeadermodel.Data.Id;
                     var cartDetailsmodel = await _mapper.Map<CartDetailsResponseDto, CartDetails>(request.CartDetailsResponse.First());
-                    await _context.AddAsync(cartDetailsmodel.Data);
-                    await _context.SaveChangesAsync();
+                    var createcartDetails = await _context.AddAsync(cartDetailsmodel.Data);
 
+                    createcartDetails.State = createcartDetails.State ==  EntityState.Added ? EntityState.Added : EntityState.Unchanged;
+                                                                                
                     var mappedCommand = new AddCartCommand
                     {
                         CartHeaderResponse = new CartHeaderResponseDto

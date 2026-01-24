@@ -33,17 +33,17 @@ namespace eCommerceWebMVC.Services.AuthServices.Implementation
                 var responseData = result.Response.Data.ToString();
                 if (bool.TryParse(responseData, out var data))
                 {
-                    return await Result<bool>.SuccessAsync(data, "Deleted Successfully", true);
+                    return Result<bool>.Success(data, "Deleted Successfully", true);
                 }
                 else
                 {
                     // Log or handle unexpected content
                     Console.WriteLine("Unexpected response data format.");
-                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                    return Result<bool>.Faild(false, "Unexpected response data format.");
                 }
             }
 
-            return await Result<bool>.FaildAsync(false, result.Message);
+            return Result<bool>.Faild(false, result.Message);
         }
 
         public async Task<Result<IList<string>>> GetUserRolesAsync(string userId)
@@ -59,16 +59,16 @@ namespace eCommerceWebMVC.Services.AuthServices.Implementation
                 if (result.Response.Data is not null)
                 {
                     var data = JsonConvert.DeserializeObject<IList<string>>(result.Response.Data.ToString());
-                    return await Result<IList<string>>.SuccessAsync(data, result.Message, true);
+                    return Result<IList<string>>.Success(data, result.Message, true);
                 }
                 else
                 {
-                    return await Result<IList<string>>.FaildAsync(false, "result.Response.Data is null");
+                    return Result<IList<string>>.Faild(false, "result.Response.Data is null");
                 }
             }
             else
             {
-                return await Result<IList<string>>.FaildAsync(false, result.Message);
+                return Result<IList<string>>.Faild(false, result.Message);
             }
         }
 
@@ -84,11 +84,11 @@ namespace eCommerceWebMVC.Services.AuthServices.Implementation
             if (result.IsSuccess && result.Response.Data is not null)
             {
                 var data = JsonConvert.DeserializeObject<LoginResponseDTO>(result.Response.Data.ToString());
-                return await Result<LoginResponseDTO>.SuccessAsync(data, "User logged Successfully", true);
+                return Result<LoginResponseDTO>.Success(data, "User logged Successfully", true);
             }
             else
             {
-                return await Result<LoginResponseDTO>.FaildAsync(false, "Username or Password are incorrect");
+                return Result<LoginResponseDTO>.Faild(false, "Username or Password are incorrect");
             }
         }
 
@@ -104,11 +104,11 @@ namespace eCommerceWebMVC.Services.AuthServices.Implementation
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<UserDTO>(result.Response.Data.ToString());
-                return await Result<UserDTO>.SuccessAsync(data, "User is Created Successfully", true);
+                return Result<UserDTO>.Success(data, "User is Created Successfully", true);
             }
             else
             {
-                return await Result<UserDTO>.FaildAsync(false, result.Message);
+                return Result<UserDTO>.Faild(false, result.Message);
             }
         }
     }

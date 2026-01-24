@@ -42,7 +42,7 @@ namespace eCommerceWebMVC.Controllers
                 return View(response.Data);
             }
 
-            TempData["error"] = "No Coupons are found";
+            TempData["error"] = "No Products are found";
             return Json(response.Message);
         }
 
@@ -72,7 +72,7 @@ namespace eCommerceWebMVC.Controllers
                 string uniqueFileName = UploadFile(request);
                 request.ImageUrl = uniqueFileName;
 
-                var response = await _service.CreaAsync(request);
+                var response = await _service.CreatAsync(request);
                 if (response.IsSuccess)
                 {
                     return RedirectToAction(nameof(Index));

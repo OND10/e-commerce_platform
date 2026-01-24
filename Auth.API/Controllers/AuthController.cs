@@ -7,6 +7,7 @@ using MessageBus.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Threading;
 
 namespace Auth.API.Controllers
@@ -33,7 +34,7 @@ namespace Auth.API.Controllers
             var result = await _authService.Register(request);
             if (result.IsSuccess)
             {
-                await _messageBus.PublishMessage(request.Email, _configuration.GetValue<string>("TopicAndQueueNames:UserLoggingQueue"));
+                //await _messageBus.PublishMessage(request.Email, _configuration.GetValue<string>("TopicAndQueueNames:UserLoggingQueue"));
                 return await Result<UserDTO>.SuccessAsync(result.Data, "User Added Successfully", true);
             }
 

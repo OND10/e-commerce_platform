@@ -35,16 +35,16 @@ namespace eCommerceWebMVC.Services.CartServices.Implementation
                 var responseData = result.Response.Data.ToString();
                 if (bool.TryParse(responseData, out var data))
                 {
-                    return await Result<bool>.SuccessAsync(data, "Coupon is applied to Cart Successfully", true);
+                    return Result<bool>.Success(data, "Coupon is applied to Cart Successfully", true);
                 }
                 else
                 {
                     // Log or handle unexpected content
                     Console.WriteLine("Unexpected response data format.");
-                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                    return Result<bool>.Faild(false, "Unexpected response data format.");
                 }
             }
-            return await Result<bool>.FaildAsync(false, result.Message);
+            return Result<bool>.Faild(false, result.Message);
 
         }
 
@@ -62,17 +62,17 @@ namespace eCommerceWebMVC.Services.CartServices.Implementation
                 var responseData = result.Response.Data.ToString();
                 if (bool.TryParse(responseData, out var data))
                 {
-                    return await Result<bool>.SuccessAsync(data, "Deleted Successfully", true);
+                    return Result<bool>.Success(data, "Deleted Successfully", true);
                 }
                 else
                 {
                     // Log or handle unexpected content
                     Console.WriteLine("Unexpected response data format.");
-                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                    return Result<bool>.Faild(false, "Unexpected response data format.");
                 }
 
             }
-            return await Result<bool>.FaildAsync(false, result.Message);
+            return Result<bool>.Faild(false, result.Message);
         }
 
         public async Task<Result<IEnumerable<CartDto>>> GetAsync(string userId)
@@ -88,16 +88,16 @@ namespace eCommerceWebMVC.Services.CartServices.Implementation
                 if (result.Response.Data is not null)
                 {
                     var data = JsonConvert.DeserializeObject<IEnumerable<CartDto>>(result.Response.Data.ToString());
-                    return await Result<IEnumerable<CartDto>>.SuccessAsync(data, "Viewed Successfully", true);
+                    return Result<IEnumerable<CartDto>>.Success(data, "Viewed Successfully", true);
                 }
                 else
                 {
-                    return await Result<IEnumerable<CartDto>>.FaildAsync(false, "result.Response.Data is null");
+                    return Result<IEnumerable<CartDto>>.Faild(false, "result.Response.Data is null");
                 }
             }
             else
             {
-                return await Result<IEnumerable<CartDto>>.FaildAsync(false, result.Message);
+                return Result<IEnumerable<CartDto>>.Faild(false, result.Message);
             }
         }
 
@@ -113,11 +113,11 @@ namespace eCommerceWebMVC.Services.CartServices.Implementation
             if (result.IsSuccess)
             {
                 var data = JsonConvert.DeserializeObject<CartDto>(result.Response.Data.ToString());
-                return await Result<CartDto>.SuccessAsync(data, "Created Successfully", true);
+                return Result<CartDto>.Success(data, "Created Successfully", true);
             }
             else
             {
-                return await Result<CartDto>.FaildAsync(false, result.Message);
+                return Result<CartDto>.Faild(false, result.Message);
             }
         }
 
@@ -135,16 +135,16 @@ namespace eCommerceWebMVC.Services.CartServices.Implementation
                 var responseData = result.Response.Data.ToString();
                 if (bool.TryParse(responseData, out var data))
                 {
-                    return await Result<bool>.SuccessAsync(data, "Coupon Removed from Cart Successfully", true);
+                    return Result<bool>.Success(data, "Coupon Removed from Cart Successfully", true);
                 }
                 else
                 {
                     // Log or handle unexpected content
                     Console.WriteLine("Unexpected response data format.");
-                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                    return Result<bool>.Faild(false, "Unexpected response data format.");
                 }
             }
-            return await Result<bool>.FaildAsync(false, result.Message);
+            return  Result<bool>.Faild(false, result.Message);
         }
 
         public async Task<Result<bool>> EmailCart(CartDto cart)
@@ -161,16 +161,16 @@ namespace eCommerceWebMVC.Services.CartServices.Implementation
                 var responseData = result.Response.Data.ToString();
                 if (bool.TryParse(responseData, out var data))
                 {
-                    return await Result<bool>.SuccessAsync(data, "Coupon is applied to Cart Successfully", true);
+                    return  Result<bool>.Success(data, "Coupon is applied to Cart Successfully", true);
                 }
                 else
                 {
                     // Log or handle unexpected content
                     Console.WriteLine("Unexpected response data format.");
-                    return await Result<bool>.FaildAsync(false, "Unexpected response data format.");
+                    return  Result<bool>.Faild(false, "Unexpected response data format.");
                 }
             }
-            return await Result<bool>.FaildAsync(false, result.Message);
+            return Result<bool>.Faild(false, result.Message);
         }
     }
 }
