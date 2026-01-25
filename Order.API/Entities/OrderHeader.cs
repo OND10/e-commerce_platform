@@ -1,42 +1,73 @@
-﻿using Order.API.Features.Orders.Dtos.Response;
-using System.ComponentModel.DataAnnotations;
+﻿using Common.BuildingBlocks.Domain;
+using Common.BuildingBlocks.Domain.ValueObjects;
+using System;
+using System.Collections.Generic;
 
 namespace Order.API.Entities
 {
-    public class OrderHeader
+    public class OrderHeader : Entity
     {
-        [Key] 
-        public int Id { get; set; }
-        public string? UserId { get; set; }
-        public string? CouponCode { get; set; }
-        public double Discount { get; set; }
-        public double OrderTotal { get; set; }
-        public string? Name { get; set; }
-        public string? Email { get; set; }
-        public string? PhoneNumber { get; set; }
-        public DateTime OrderTime {  get; set; }
-        public string? Status { get; set; }
-        //This properties for payment mechanism
-        public string? PaymentIntentId {  get; set; }
-        public string? StripeSessionId {  get; set; }
-        //One to may relationship between the orderheader and orderdetails
-        public List<OrderDetails>? OrderDetails { get; set; }
+        public string? UserId { get; private set; }
+        public string? CouponCode { get; private set; }
+        public double Discount { get; private set; }
+        public double OrderTotal { get; private set; }
+        public string? Name { get; private set; }
+        public string? EmailAddress { get; private set; } // Renamed to avoid confusion with Email VO if used directly
+        public string? PhoneNumber { get; private set; }
+        public DateTime OrderTime { get; private set; }
+        public OrderState OrderState { get; private set; } // Replaced string Status with Enum
+        
+        // Payment Info
+        public string? PaymentIntentId { get; private set; }
+        public string? StripeSessionId { get; private set; }
+        public string? TrackingNumber { get; private set; }
 
-        public OrderHeader ToModel(OrderHeaderResponseDto response)
+        // Navigation
+        private readonly List<OrderDetails> _orderDetails = new();
+        public IReadOnlyCollection<OrderDetails> OrderDetails => _orderDetails.AsReadOnly();
+        
+        // Value Objects (Optional: could map Name/Address/Email to VOs)
+        // public Address BillingAddress { get; private set; } 
+
+        // Constructor for EF Core
+        private OrderHeader() { }
+
+        // Factory Method
+        public static OrderHeader Create(string userId, string name, string email, string phone, double orderTotal)
         {
             return new OrderHeader
             {
-                UserId = response.UserId,
-                CouponCode = response.CouponCode,
-                Discount = response.Discount,
-                OrderTotal = response.OrderTotal,
-                Name = response.Name,
-                Email = response.Email,
-                PhoneNumber = response.PhoneNumber,
-                Status = response.Status,
-                OrderTime = response.OrderTime,
-                OrderDetails = new List<OrderDetails>() // Change to List
+                UserId = userId,
+                Name = name,
+                EmailAddress = email,
+                PhoneNumber = phone,
+                OrderTotal = orderTotal,
+                OrderTime = DateTime.UtcNow,
+                OrderState = OrderState.Created
             };
+        }
+
+        public void AddLineItem(int productId, string productName, double price, int count)
+        {
+            if (count <= 0) throw new ArgumentException("Count must be greater than zero");
+            
+            _orderDetails.Add(new OrderDetails(productId, productName, price, count));
+        }
+
+        public void SetPaymentIntent(string intentId, string sessionId)
+        {
+            PaymentIntentId = intentId;
+            StripeSessionId = sessionId;
+        }
+
+        public void SetTracking(string trackingNumber)
+        {
+            TrackingNumber = trackingNumber;
+        }
+
+        internal void SetState(OrderState newState)
+        {
+            OrderState = newState;
         }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Order.API.Common.Handler;
+using Common.BuildingBlocks.Results;
 using Order.API.DataBase;
 using Order.API.Entities;
 using Order.API.Features.Orders.Dtos.Response;
-using System.Security.Claims;
 
 namespace Order.API.Features.Orders.Requests.Queries.GetOrder
 {
@@ -19,122 +18,79 @@ namespace Order.API.Features.Orders.Requests.Queries.GetOrder
 
         public async Task<Result<IEnumerable<OrderHeaderResponseDto>>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
         {
-            var result = default(Result<IEnumerable<OrderHeaderResponseDto>>); // Specify the type for default
+            IEnumerable<OrderHeaderResponseDto> result;
 
-            string[] validProcesses = { "Admin", "User" };
-            var obj = new Dictionary<string, Func<Task<Result<IEnumerable<OrderHeaderResponseDto>>>>>()
+            if (request.Role == "Admin")
             {
-                    {"Admin", async() => await GetAllOrders()},
-                    {"User", async() => await GetAllUserOrders(request.userId)}
-            };
+                result = await GetAllOrders(cancellationToken);
+            }
+            else
+            {
+                result = await GetAllUserOrders(request.userId, cancellationToken);
+            }
 
-            result = await obj[request.Role]();
-
-
-            return await Result<IEnumerable<OrderHeaderResponseDto>>.SuccessAsync(result.Data, result.Message, true);
+            return Result.Success(result);
         }
-        private async Task<Result<IEnumerable<OrderHeaderResponseDto>>>GetAllOrders()
+
+        private async Task<IEnumerable<OrderHeaderResponseDto>> GetAllOrders(CancellationToken cancellationToken)
         {
+            var orderHeaderList = await _context.OrderHeaders
+                .Include(o => o.OrderDetails)
+                .OrderByDescending(o => o.Id)
+                .ToListAsync(cancellationToken);
 
-            var orderHeaderDtoList = new List<OrderHeaderResponseDto>();
-            var orderDetailsList = new List<OrderDetailsResponseDto>();
+            return MapToDto(orderHeaderList);
+        }
 
-            var orderHeaderList = await _context.OrderHeaders.Include(o => o.OrderDetails).OrderByDescending(o => o.Id).ToListAsync();
+        private async Task<IEnumerable<OrderHeaderResponseDto>> GetAllUserOrders(string? userId, CancellationToken cancellationToken)
+        {
+            var orderHeaderList = await _context.OrderHeaders
+                .Include(o => o.OrderDetails)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.Id)
+                .ToListAsync(cancellationToken);
 
-            foreach (var orderHeader in orderHeaderList)
+            return MapToDto(orderHeaderList);
+        }
+
+        private IEnumerable<OrderHeaderResponseDto> MapToDto(List<OrderHeader> orderHeaders)
+        {
+            var dtoList = new List<OrderHeaderResponseDto>();
+
+            foreach (var orderHeader in orderHeaders)
             {
-
-                foreach (var item in orderHeader.OrderDetails)
+                var orderDetailsList = orderHeader.OrderDetails.Select(item => new OrderDetailsResponseDto
                 {
-                    var orderDetails = new OrderDetailsResponseDto
-                    {
-                        Id = item.Id,
-                        Count = item.Count,
-                        OrderHeaderId = item.OrderHeaderId,
-                        Price = item.Price,
-                        Product = item.Product,
-                        ProductId = item.ProductId,
-                        ProductName = item.ProductName,
-                    };
-                    orderDetailsList.Add(orderDetails);
-                }
+                    Id = item.Id,
+                    Count = item.Count,
+                    OrderHeaderId = item.OrderHeaderId,
+                    Price = item.Price,
+                    Product = item.Product,
+                    ProductId = item.ProductId,
+                    ProductName = item.ProductName,
+                }).ToList();
 
                 var orderResponse = new OrderHeaderResponseDto
                 {
                     Id = orderHeader.Id,
                     CouponCode = orderHeader.CouponCode,
                     Discount = orderHeader.Discount,
-                    Email = orderHeader.Email,
+                    Email = orderHeader.EmailAddress, // Correct property
                     Name = orderHeader.Name,
                     OrderTime = orderHeader.OrderTime,
                     OrderTotal = orderHeader.OrderTotal,
                     PaymentIntentId = orderHeader.PaymentIntentId,
                     PhoneNumber = orderHeader.PhoneNumber,
-                    Status = orderHeader.Status,
+                    Status = orderHeader.OrderState.ToString(), // Correct property
                     StripeSessionId = orderHeader.StripeSessionId,
                     UserId = orderHeader.UserId,
                     OrderDetails = orderDetailsList
                 };
 
-                orderHeaderDtoList.Add(orderResponse);
+                dtoList.Add(orderResponse);
             }
 
-
-            return await Result<IEnumerable<OrderHeaderResponseDto>>.SuccessAsync(orderHeaderDtoList, "GetAll Orders Successfully", true);
+            return dtoList;
         }
-        private async Task<Result<IEnumerable<OrderHeaderResponseDto>>> GetAllUserOrders(string? userId = "")
-        {
-            var orderHeaderDtoList = new List<OrderHeaderResponseDto>();
-            var orderDetailsList = new List<OrderDetailsResponseDto>();
-
-            var orderHeaderList = await _context.OrderHeaders.Include(o => o.OrderDetails).Where(o=> o.UserId == userId).OrderByDescending(o => o.Id).ToListAsync();
-
-            orderHeaderDtoList = new List<OrderHeaderResponseDto>();
-
-            orderDetailsList = new List<OrderDetailsResponseDto>();
-
-
-            foreach (var orderHeader in orderHeaderList)
-            {
-
-                foreach (var item in orderHeader.OrderDetails)
-                {
-                    var orderDetails = new OrderDetailsResponseDto
-                    {
-                        Id = item.Id,
-                        Count = item.Count,
-                        OrderHeaderId = item.OrderHeaderId,
-                        Price = item.Price,
-                        Product = item.Product,
-                        ProductId = item.ProductId,
-                        ProductName = item.ProductName,
-                    };
-                    orderDetailsList.Add(orderDetails);
-                }
-
-                var orderResponse = new OrderHeaderResponseDto
-                {
-                    Id = orderHeader.Id,
-                    CouponCode = orderHeader.CouponCode,
-                    Discount = orderHeader.Discount,
-                    Email = orderHeader.Email,
-                    Name = orderHeader.Name,
-                    OrderTime = orderHeader.OrderTime,
-                    OrderTotal = orderHeader.OrderTotal,
-                    PaymentIntentId = orderHeader.PaymentIntentId,
-                    PhoneNumber = orderHeader.PhoneNumber,
-                    Status = orderHeader.Status,
-                    StripeSessionId = orderHeader.StripeSessionId,
-                    UserId = orderHeader.UserId,
-                    OrderDetails = orderDetailsList
-                };
-
-                orderHeaderDtoList.Add(orderResponse);
-            }
-
-            return await Result<IEnumerable<OrderHeaderResponseDto>>.SuccessAsync(orderHeaderDtoList, "GetAll User Orders Successfully", true);
-
-        }
-    
     }
 }

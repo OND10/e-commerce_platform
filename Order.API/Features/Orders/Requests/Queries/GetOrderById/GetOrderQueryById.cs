@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Order.API.Common.Handler;
+using Common.BuildingBlocks.Results;
 using Order.API.Features.Orders.Dtos.Response;
 
 namespace Order.API.Features.Orders.Requests.Queries.GetOrderById

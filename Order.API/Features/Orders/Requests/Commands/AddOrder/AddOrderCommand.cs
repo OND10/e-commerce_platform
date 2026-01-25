@@ -1,13 +1,10 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Order.API.Common.Handler;
-using Order.API.Features.Dtos.Request;
+using Common.BuildingBlocks.Results;
+using Order.API.Features.Orders.Dtos.Request;
 using Order.API.Features.Orders.Dtos.Response;
+using Order.API.Features.Dtos.Request; 
 
 namespace Order.API.Features.Orders.Requests.Commands.AddOrder
 {
-    public class AddOrderCommand : IRequest<Result<OrderHeaderResponseDto>>
-    {
-        public CartDto cartDto { get; set; }
-    }
+    public record AddOrderCommand(CartDto cartDto) : IRequest<Result<OrderHeaderResponseDto>>;
 }

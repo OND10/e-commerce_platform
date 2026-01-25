@@ -1,11 +1,9 @@
 using AutoMapper;
-using MessageBus.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Order.API.Common;
 using Order.API.Common.Enum;
-using Order.API.Common.Handler;
 using Order.API.DataBase;
 using Order.API.Extensions;
 using Order.API.Mappings;
@@ -16,17 +14,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<BackendAPIAuthenticationHttpClientHandler>();
+builder.Services.AddHttpContextAccessor();
+// Auth Handler removed
 //Adding Product Service to make tasking works propeply
 builder.Services
     .AddHttpClient("Product", client =>
     {
         client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]);
     })
-    .AddHttpMessageHandler<BackendAPIAuthenticationHttpClientHandler>()
     .AddPolicyHandler(PolicyConfig.GetRetryPolicy())
     .AddPolicyHandler(PolicyConfig.GetCircuitBreakerPolicy());
-builder.Services.AddScoped<IMessageBusService, MessageBusService>();
+// Handler Removed
 HttpMethodType.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"];
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

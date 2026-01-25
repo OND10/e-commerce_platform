@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Common.BuildingBlocks.Results;
+using Newtonsoft.Json;
 using Order.API.Features.Products.Dtos.Response;
-using Order.API.Common.Handler;
 namespace Order.API.Features.Products.Services
 {
     public class ProductService : IProductService
@@ -14,15 +14,20 @@ namespace Order.API.Features.Products.Services
         {
             HttpClient client = _httpClientFactory.CreateClient("Poduct");
             var response = await client.GetAsync($"{Common.Enum.HttpMethodType.ProductAPIBase}/api/product");
-            var apiContent = await response.Content.ReadAsStringAsync();
-            var resp = JsonConvert.DeserializeObject<Shared.HttpResponse>(apiContent);
-            if (resp.IsSuccess)
+            if (response.IsSuccessStatusCode)
             {
-                var obj = JsonConvert.DeserializeObject<IEnumerable<ProductResponseDto>>(Convert.ToString(resp.Data));
-                return await Result<IEnumerable<ProductResponseDto>>.SuccessAsync(obj, "Viewed Successfully", true);
+                var content = await response.Content.ReadAsStringAsync();
+                var responseDto = JsonConvert.DeserializeObject<Result<IEnumerable<ProductResponseDto>>>(content);
+                if (responseDto != null && responseDto.IsSuccess)
+                {
+                    return responseDto;
+                }
+                // If HTTP status is success but the internal Result indicates failure
+                return Result.Failure<IEnumerable<ProductResponseDto>>(responseDto?.Error.Description ?? "Failed to retrieve products from API.");
             }
-
-            return await Result<IEnumerable<ProductResponseDto>>.FaildAsync(false, "Not Viewed");
+            // If HTTP status is not success
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return Result.Failure<IEnumerable<ProductResponseDto>>($"API call failed with status code {response.StatusCode}. Details: {errorContent}");
         }
 
     }

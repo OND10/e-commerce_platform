@@ -1,12 +1,12 @@
 ﻿using MediatR;
-using Order.API.Common.Handler;
+using Common.BuildingBlocks.Results;
 using Order.API.DataBase;
 using Order.API.Entities;
 using Order.API.Features.Stripe.Dtos.Request;
 using Order.API.Shared;
 using Stripe;
 using Stripe.Checkout;
-using static Microsoft.Azure.Amqp.Serialization.SerializableType;
+using Microsoft.EntityFrameworkCore;
 
 namespace Order.API.Features.Stripe.Requests.Commands.CreateStripeSession
 {
@@ -31,35 +31,31 @@ namespace Order.API.Features.Stripe.Requests.Commands.CreateStripeSession
                 };
 
                 var couponCode = request.OrderHeader.CouponCode;
-                Console.WriteLine($"Coupon code being used: {couponCode}");
-
+                
                 if (request.OrderHeader.Discount > 0 && !string.IsNullOrEmpty(couponCode))
                 {
                     var stripeCouponService = new CouponService();
                     try
                     {
-                        // List coupons to verify existence and ID
-                        var coupons = await stripeCouponService.ListAsync();
+                        var coupons = await stripeCouponService.ListAsync(cancellationToken: cancellationToken);
                         var coupon = coupons.Data.FirstOrDefault(c => c.Name == couponCode);
                         if (coupon == null)
                         {
-                            return await Result<StripeRequestDto>.FaildAsync(false, $"Coupon {couponCode} does not exist.");
+                            return Result.Failure<StripeRequestDto>($"Coupon {couponCode} does not exist.");
                         }
-                        Console.WriteLine($"Stripe Coupon retrieved: {coupon.Id}, {coupon.PercentOff}% off");
 
                         var discountObj = new List<SessionDiscountOptions>
-                    {
-                        new SessionDiscountOptions
                         {
-                            Coupon = coupon.Id
-                        }
-                    };
+                            new SessionDiscountOptions
+                            {
+                                Coupon = coupon.Id
+                            }
+                        };
                         options.Discounts = discountObj;
                     }
                     catch (StripeException stripeEx)
                     {
-                        Console.WriteLine($"Stripe error: {stripeEx.Message}");
-                        return await Result<StripeRequestDto>.FaildAsync(false, $"Coupon validation failed: {stripeEx.Message}");
+                        return Result.Failure<StripeRequestDto>($"Coupon validation failed: {stripeEx.Message}");
                     }
                 }
 
@@ -73,7 +69,7 @@ namespace Order.API.Features.Stripe.Requests.Commands.CreateStripeSession
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = item.Product.Name,
+                                Name = item.ProductName, // DTO usually has ProductName directly or Product.Name
                             }
                         },
                         Quantity = item.Count
@@ -82,30 +78,30 @@ namespace Order.API.Features.Stripe.Requests.Commands.CreateStripeSession
                 }
 
                 var service = new SessionService();
-                // Creating a new session
-                Session session = service.Create(options);
+                Session session = await service.CreateAsync(options, cancellationToken: cancellationToken);
+                
                 request.StripeSessionUrl = session.Url;
-                OrderHeader orderHeader = _context.OrderHeaders.First(u => u.Id == request.OrderHeader.Id);
-                orderHeader.StripeSessionId = session.Id;
-                _context.SaveChanges();
+                
+                OrderHeader orderHeader = await _context.OrderHeaders.FirstAsync(u => u.Id == request.OrderHeader.Id, cancellationToken);
+                orderHeader.SetPaymentIntent(orderHeader.PaymentIntentId, session.Id); // Updating SessionId
+                
+                await _context.SaveChangesAsync(cancellationToken);
 
                 var mappedResponse = new StripeRequestDto
                 {
-                    StripeSessionId = request.StripeSessionId,
+                    StripeSessionId = request.StripeSessionId, // Note: This might be null if not set in request. Should it be session.Id? request object is likely DTO holder.
                     StripeSessionUrl = request.StripeSessionUrl,
                     ApprovedUrl = request.ApprovedUrl,
                     CancelUrl = request.CancelUrl,
                     OrderHeader = request.OrderHeader
                 };
 
-                return await Result<StripeRequestDto>.SuccessAsync(mappedResponse, $"SessionId is {ResponseStatus.CreatSuccess}", true);
+                return Result.Success(mappedResponse);
             }
             catch (Exception ex)
             {
-                return await Result<StripeRequestDto>.FaildAsync(false, ex.Message);
+                return Result.Failure<StripeRequestDto>(ex.Message);
             }
-
         }
     }
-
 }

@@ -1,10 +1,9 @@
 ﻿using MediatR;
-using MessageBus.Services;
+using Common.BuildingBlocks.Messaging; // Use IEventBus
+using Common.BuildingBlocks.Results;
 using Microsoft.EntityFrameworkCore;
-using Order.API.Common.Enum;
-using Order.API.Common.Handler;
-using Order.API.DataBase;
 using Order.API.Entities;
+using Order.API.DataBase;
 using Order.API.Features.Orders.Dtos.Response;
 using Order.API.Features.Rewards;
 using Stripe;
@@ -15,33 +14,35 @@ namespace Order.API.Features.Stripe.Requests.Queries.ValidateStripeSession
     public class ValidateStripeSessionQueryHandler : IRequestHandler<ValidateStripeSessionQuery, Result<OrderHeaderResponseDto>>
     {
         private readonly AppDbContext _context;
-        private readonly IMessageBusService _messageBusService;
+        private readonly IEventBus _eventBus;
         private readonly IConfiguration _configuration;
-        public ValidateStripeSessionQueryHandler(AppDbContext context, IMessageBusService messageBusService, IConfiguration configuration)
+
+        public ValidateStripeSessionQueryHandler(AppDbContext context, IEventBus eventBus, IConfiguration configuration)
         {
             _context = context;
-            _messageBusService = messageBusService;
+            _eventBus = eventBus;
             _configuration = configuration;
         }
+
         public async Task<Result<OrderHeaderResponseDto>> Handle(ValidateStripeSessionQuery request, CancellationToken cancellationToken)
         {
-            OrderHeader orderHeader = await _context.OrderHeaders.FirstAsync(u => u.Id == request.OrderHeadreId);
+            OrderHeader orderHeader = await _context.OrderHeaders.FirstAsync(u => u.Id == request.OrderHeadreId, cancellationToken);
 
             var serivce = new SessionService();
+            Session checkSessionId = await serivce.GetAsync(orderHeader.StripeSessionId, cancellationToken: cancellationToken);
 
-            //looking for StripeSessionIs in Stripe
-
-            Session checkSessionId = serivce.Get(orderHeader.StripeSessionId);
-
-            //Check Order Status
             var paymentIntentService = new PaymentIntentService();
-            PaymentIntent paymentIntent = paymentIntentService.Get(checkSessionId.PaymentIntentId);
+            PaymentIntent paymentIntent = await paymentIntentService.GetAsync(checkSessionId.PaymentIntentId, cancellationToken: cancellationToken);
 
-            if(paymentIntent.Status == "succeeded")
+            if (paymentIntent.Status == "succeeded")
             {
-                orderHeader.PaymentIntentId = paymentIntent.Id;
-                orderHeader.Status = StatusEnum.Status_Approved;
-                _context.SaveChanges();
+                orderHeader.SetPaymentIntent(paymentIntent.Id, orderHeader.StripeSessionId);
+                // orderHeader.Status = StatusEnum.Status_Approved; // Use state machine or manual update if enum conversion needed
+                // Assuming we can set state directly for now or via method
+                // mapped to OrderState? Approved means Paid?
+                orderHeader.SetState(OrderState.Paid); 
+                
+                await _context.SaveChangesAsync(cancellationToken);
 
                 RewardDto rewardDto = new RewardDto()
                 {
@@ -50,26 +51,27 @@ namespace Order.API.Features.Stripe.Requests.Queries.ValidateStripeSession
                     RewardsActivity = Convert.ToInt32(orderHeader.OrderTotal)
                 };
 
-                string topicName = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
-                await _messageBusService.PublishMessage(rewardDto, topicName);
+                // MassTransit Publish (no topic name needed if using Type-based routing, typically)
+                // But keeping user logic if using topic name config? MassTransit standard is publish T.
+                await _eventBus.PublishAsync(rewardDto, cancellationToken);
             }
 
             var orderHeaderResponse = new OrderHeaderResponseDto()
             {
+                Id = orderHeader.Id,
                 UserId = orderHeader.UserId,
                 CouponCode = orderHeader.CouponCode,
                 Discount = orderHeader.Discount,
                 OrderTotal = orderHeader.OrderTotal,
                 Name = orderHeader.Name,
-                Email = orderHeader.Email,
+                Email = orderHeader.EmailAddress,
                 PhoneNumber = orderHeader.PhoneNumber,
-                Status = orderHeader.Status,
+                Status = orderHeader.OrderState.ToString(),
                 OrderTime = orderHeader.OrderTime,
                 OrderDetails = new List<OrderDetailsResponseDto>()
             };
 
-
-            return await Result<OrderHeaderResponseDto>.SuccessAsync(orderHeaderResponse, "Order is Verfied Successfully", true);
+            return Result.Success(orderHeaderResponse);
         }
     }
 }
