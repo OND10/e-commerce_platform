@@ -1,18 +1,14 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using OnMapper;
-using Product.API.Common.Handler;
+using Common.BuildingBlocks.Results;
 using Product.API.Features.Products.DTOs;
 using Product.API.Features.Products.Requests.Commands.AddProduct;
 using Product.API.Features.Products.Requests.Commands.DeleteProduct;
 using Product.API.Features.Products.Requests.Commands.UpdateProduct;
 using Product.API.Features.Products.Requests.Queries.GetProductById;
 using Product.API.Features.Products.Requests.Queries.GetProducts;
-using System.Threading;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Product.API.Features.Products
 {
@@ -21,83 +17,74 @@ namespace Product.API.Features.Products
     public class ProductController : ControllerBase
     {
         private readonly ISender _sender;
-        private readonly OnMapping _mapper;
-        public ProductController(ISender sender, OnMapping mapper)
+        private readonly IMapper _mapper;
+
+        public ProductController(ISender sender, IMapper mapper)
         {
             _sender = sender;
             _mapper = mapper;
         }
 
-
         [HttpGet]
         public async Task<Result<IEnumerable<ProductResponseDto>>> Get(CancellationToken cancellationToken)
         {
-            var command = new GetProductQuery();
-            var result = await _sender.Send(command, cancellationToken);
-            //result.Data = null;
-            return await Result<IEnumerable<ProductResponseDto>>.SuccessAsync(result.Data, "Viewed Successfully", true);
+            var query = new GetProductQuery();
+            return await _sender.Send(query, cancellationToken);
         }
 
         [HttpGet("{id}")]
         public async Task<Result<ProductResponseDto>> Get(int id, CancellationToken cancellationToken)
         {
-            var command = new GetProductByIdQuery
-            {
-                Id = id,
-            };
-            var result = await _sender.Send(command, cancellationToken);
-            return await Result<ProductResponseDto>.SuccessAsync(result.Data, "Found Successfully", true);
+            var query = new GetProductByIdQuery { Id = id };
+            return await _sender.Send(query, cancellationToken);
         }
 
         [HttpPost]
         public async Task<Result<ProductResponseDto>> Post([FromBody] ProductRequestDto model, CancellationToken cancellationToken)
         {
-
-            var mappedCommand = await _mapper.Map<ProductRequestDto, AddProductCommand>(model);
-            var result = await _sender.Send(mappedCommand.Data, cancellationToken);
-
-            return await Result<ProductResponseDto>.SuccessAsync(result.Data, "Created Successfully", true);
+            // Direct mapping or using command directly if DTO matches?
+            // Existing code used _mapper to Map DTO -> Command. 
+            // Better: Command takes DTO or properties.
+            // Let's assume Command takes DTO or properties.
+            // For now, I'll instantiate command. 
+            // Note: Old code: _mapper.Map<ProductRequestDto, AddProductCommand>(model);
+            
+             var command = new AddProductCommand
+             {
+                 Name = model.Name,
+                 Description = model.Description,
+                 Price = model.Price,
+                 Category = model.Category,
+                 ImageUrl = model.ImageUrl,
+                 NumberofProduct = model.NumberofProduct
+             };
+             
+            return await _sender.Send(command, cancellationToken);
         }
 
         [HttpPut]
         [Route("{id:int}")]
         public async Task<Result<ProductResponseDto>> Put([FromRoute] int id, [FromBody] ProductRequestDto model, CancellationToken cancellationToken)
         {
-            try
+            var command = new UpdateProductCommand
             {
-                var mappedRequestModel = await _mapper.Map<ProductRequestDto, UpdateProductCommand>(model);
-                mappedRequestModel.Data.Id = id;
-                var updateResult = await _sender.Send(mappedRequestModel.Data, cancellationToken);
-                return await Result<ProductResponseDto>.SuccessAsync(updateResult.Data, "Updated Successfully", true);
-            }
-            catch (Exception)
-            {
-                return await Result<ProductResponseDto>.FaildAsync(true, "Not Updated");
-            }
+                Id = id,
+                Name = model.Name,
+                Description = model.Description,
+                Price = model.Price,
+                Category = model.Category,
+                ImageUrl = model.ImageUrl,
+                NumberofProduct = model.NumberofProduct
+            };
+            return await _sender.Send(command, cancellationToken);
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<Result<bool>> Delete(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                var command = new DeleteProductCommand
-                {
-                    Id = id
-                };
-                var delete = await _sender.Send(command, cancellationToken);
-                if (delete.IsSuccess)
-                {
-                    return await Result<bool>.SuccessAsync(delete.Data, "Deleted Successfully", true);
-                }
-                return await Result<bool>.FaildAsync(false, "Not Deleted");
-            }
-            catch (Exception)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
+            var command = new DeleteProductCommand { Id = id };
+            return await _sender.Send(command, cancellationToken);
         }
-
     }
 }

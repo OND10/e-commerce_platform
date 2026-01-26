@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Product.API.Common.Handler;
+using Common.BuildingBlocks.Results;
 using Product.API.Features.Products.DTOs;
 
 namespace Product.API.Features.Products.Requests.Commands.AddProduct

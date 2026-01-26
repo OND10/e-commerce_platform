@@ -12,7 +12,7 @@ namespace Order.API.Entities
         // EF Core can set this via backing field or constructor if configured, 
         // but typically child entities don't strictly need navigation back to parent 
         // if treated as part of aggregate. Keeping for EF convenience.
-        public OrderHeader? OrderHeader { get; private set; }
+        public OrderHeader? OrderHeader { get; set; } // Settable for EF Core or via FK
         
         public int ProductId { get; private set; }
         

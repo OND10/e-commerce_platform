@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using OnMapper;
 using Product.API.Features.Products.Repository.Implementation;
 using Product.API.Features.Products.Repository.Interface;
 using System.Reflection;
@@ -42,7 +41,6 @@ namespace Product.API.Extensions
 
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IUnitofWork, UnitofWork>();
-            builder.Services.AddScoped<OnMapping>();
             builder.Services.AddAutoMapper(typeof(Program));
             var assembly = Assembly.GetExecutingAssembly();
             builder.Services.AddMediatR(cfg =>

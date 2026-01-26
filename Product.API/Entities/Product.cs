@@ -1,11 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Common.BuildingBlocks.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace Product.API.Entities
 {
-    public class Product
+    public class Product : AggregateRoot
     {
-        [Key]
-        public int Id { get; set; }
         [Required]
         public string Name { get; set; }
         public string Description { get; set; }

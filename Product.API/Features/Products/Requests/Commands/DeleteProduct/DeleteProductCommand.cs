@@ -1,6 +1,5 @@
 ﻿using MediatR;
-using Product.API.Common.Handler;
-using Product.API.Features.Products.DTOs;
+using Common.BuildingBlocks.Results;
 
 namespace Product.API.Features.Products.Requests.Commands.DeleteProduct
 {

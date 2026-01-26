@@ -2,20 +2,21 @@
 using Common.BuildingBlocks.Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
+using Order.API.Features.Orders.Events;
 
 namespace Order.API.Entities
 {
-    public class OrderHeader : Entity
+    public class OrderHeader : AggregateRoot
     {
         public string? UserId { get; private set; }
         public string? CouponCode { get; private set; }
         public double Discount { get; private set; }
         public double OrderTotal { get; private set; }
         public string? Name { get; private set; }
-        public string? EmailAddress { get; private set; } // Renamed to avoid confusion with Email VO if used directly
+        public string? EmailAddress { get; private set; }
         public string? PhoneNumber { get; private set; }
         public DateTime OrderTime { get; private set; }
-        public OrderState OrderState { get; private set; } // Replaced string Status with Enum
+        public OrderState OrderState { get; private set; }
         
         // Payment Info
         public string? PaymentIntentId { get; private set; }
@@ -26,16 +27,13 @@ namespace Order.API.Entities
         private readonly List<OrderDetails> _orderDetails = new();
         public IReadOnlyCollection<OrderDetails> OrderDetails => _orderDetails.AsReadOnly();
         
-        // Value Objects (Optional: could map Name/Address/Email to VOs)
-        // public Address BillingAddress { get; private set; } 
-
         // Constructor for EF Core
         private OrderHeader() { }
 
         // Factory Method
         public static OrderHeader Create(string userId, string name, string email, string phone, double orderTotal)
         {
-            return new OrderHeader
+            var order = new OrderHeader
             {
                 UserId = userId,
                 Name = name,
@@ -45,6 +43,10 @@ namespace Order.API.Entities
                 OrderTime = DateTime.UtcNow,
                 OrderState = OrderState.Created
             };
+            
+            order.AddDomainEvent(new OrderCreatedDomainEvent(order));
+            
+            return order;
         }
 
         public void AddLineItem(int productId, string productName, double price, int count)
