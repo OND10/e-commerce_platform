@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharedKernel\Common.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\SharedKernels\Common.BuildingBlocks.csproj" />
   </ItemGroup>
 
 </Project>

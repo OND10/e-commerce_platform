@@ -1,5 +1,5 @@
-﻿using SharedKernel.Domain;
-using SharedKernel.Results;
+﻿using SharedKernels.Domain;
+using SharedKernels.Results;
 using Product.API.Domain.ValueObjects;
 using Product.API.Domain.Events;
 

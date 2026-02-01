@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Product.API.Domain.ValueObjects;
-using SharedKernel.Results;
+using SharedKernels.Results;
 using System.Reflection;
 
 namespace Product.API.DataBase

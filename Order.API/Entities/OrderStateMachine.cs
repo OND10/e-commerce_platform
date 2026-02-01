@@ -1,4 +1,4 @@
-using SharedKernel.StateManagement;
+using SharedKernels.StateManagement;
 using System;
 using System.Collections.Generic;
 

@@ -1,5 +1,5 @@
-﻿using SharedKernel.Abstractions.Messaging;
-using SharedKernel.Results;
+﻿using SharedKernels.Abstractions.Messaging;
+using SharedKernels.Results;
 using Product.API.Features.Products.DTOs;
 
 namespace Product.API.Features.Products.Requests.Commands.UpdateProduct

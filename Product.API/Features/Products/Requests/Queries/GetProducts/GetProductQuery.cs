@@ -1,5 +1,5 @@
-﻿using SharedKernel.Abstractions.Messaging;
-using SharedKernel.Results;
+﻿using SharedKernels.Abstractions.Messaging;
+using SharedKernels.Results;
 using Product.API.Features.Products.DTOs;
 using System.Collections.Generic;
 

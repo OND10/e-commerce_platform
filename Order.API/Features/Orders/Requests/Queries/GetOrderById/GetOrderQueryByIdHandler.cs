@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Results;
+using SharedKernels.Results;
 using Order.API.DataBase;
 using Order.API.Features.Orders.Dtos.Response;
+using SharedKernels.Abstractions.Messaging;
 
 namespace Order.API.Features.Orders.Requests.Queries.GetOrderById
 {
-    public class GetOrderQueryByIdHandler : IRequestHandler<GetOrderQueryById, Result<OrderHeaderResponseDto>>
+    public class GetOrderQueryByIdHandler : IQueryHandler<GetOrderQueryById, OrderHeaderResponseDto>
     {
         private readonly AppDbContext _context;
 
@@ -23,7 +24,7 @@ namespace Order.API.Features.Orders.Requests.Queries.GetOrderById
 
             if (orderHeader == null)
             {
-                return Result.Failure<OrderHeaderResponseDto>("Order not found");
+                return Result.Failure<OrderHeaderResponseDto>(OrderNotFound);
             }
 
             var orderDetailsList = orderHeader.OrderDetails.Select(item => new OrderDetailsResponseDto
@@ -56,5 +57,7 @@ namespace Order.API.Features.Orders.Requests.Queries.GetOrderById
 
             return Result.Success(orderResponse);
         }
+
+        private Error OrderNotFound => new("500", "Order not found", SharedKernels.ErrorType.NotFound);
     }
 }

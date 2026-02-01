@@ -1,5 +1,5 @@
 using MassTransit;
-using SharedKernel.Messaging.MessageContracts;
+using SharedKernels.Messaging.MessageContracts;
 using Product.API.Features.Products.Repository.Interface;
 using Microsoft.Extensions.Logging;
 

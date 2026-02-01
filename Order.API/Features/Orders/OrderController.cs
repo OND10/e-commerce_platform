@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SharedKernel.Results; // Correct Result Namespace
+using SharedKernels.Results; // Correct Result Namespace
 using Order.API.Features.Orders.Dtos.Response;
 using Order.API.Features.Orders.Requests.Commands.AddOrder;
 using Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus;

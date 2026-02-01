@@ -1,5 +1,5 @@
-﻿using SharedKernel.Abstractions.Messaging;
-using SharedKernel.Results;
+﻿using SharedKernels.Abstractions.Messaging;
+using SharedKernels.Results;
 
 namespace Product.API.Features.Products.Requests.Commands.DeleteProduct
 {

@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using SharedKernel.Results;
+using SharedKernels.Results;
 using Product.API.Features.Products.DTOs;
 using Product.API.Features.Products.Repository.Interface;
 using AutoMapper;

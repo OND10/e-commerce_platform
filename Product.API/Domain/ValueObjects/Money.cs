@@ -1,5 +1,5 @@
-using SharedKernel.Domain;
-using SharedKernel.Results;
+using SharedKernels.Domain;
+using SharedKernels.Results;
 
 namespace Product.API.Domain.ValueObjects;
 

@@ -1,13 +1,14 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Results;
+using SharedKernels.Results;
 using Order.API.DataBase;
 using Order.API.Entities;
 using Order.API.Features.Orders.Dtos.Response;
+using SharedKernels.Abstractions.Messaging;
 
 namespace Order.API.Features.Orders.Requests.Queries.GetOrder
 {
-    public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, Result<IEnumerable<OrderHeaderResponseDto>>>
+    public class GetOrderQueryHandler : IQueryHandler<GetOrderQuery, IEnumerable<OrderHeaderResponseDto>>
     {
         private readonly AppDbContext _context;
 

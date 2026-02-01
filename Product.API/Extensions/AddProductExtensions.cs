@@ -59,8 +59,8 @@ namespace Product.API.Extensions
                 busConfigurator.UsingRabbitMq((context, configurator) =>
                 {
                     // Basic configuration - should ideally come from appsettings
-                    // Assuming default localhost guest/guest for now or usage of SharedKernel extensions if available
-                    // But SharedKernel.Messaging might have extension methods?
+                    // Assuming default localhost guest/guest for now or usage of SharedKernels extensions if available
+                    // But SharedKernels.Messaging might have extension methods?
                     // Let's stick to standard inline config for now as requested.
                     
                     configurator.Host(builder.Configuration["MessageBroker:Host"] ?? "localhost", "/", h =>

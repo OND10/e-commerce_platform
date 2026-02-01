@@ -1,4 +1,4 @@
-﻿using SharedKernel.Domain;
+﻿using SharedKernels.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
 using Order.API.Features.Products.Dtos.Response;
 

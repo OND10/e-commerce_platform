@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using SharedKernel.Results;
+using SharedKernels.Results;
 using Order.API.Features.Stripe.Dtos.Request;
 using Order.API.Features.Orders.Dtos.Response;
 

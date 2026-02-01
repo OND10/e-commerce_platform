@@ -1,5 +1,5 @@
-﻿using SharedKernel.Domain;
-using SharedKernel.Domain.ValueObjects;
+﻿using SharedKernels.Domain;
+using SharedKernels.Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using Order.API.Features.Orders.Events;

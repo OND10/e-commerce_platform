@@ -1,14 +1,15 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Results;
+using SharedKernels.Results;
 using Order.API.Entities;
 using Order.API.DataBase;
 using Stripe;
-using Order.API.Common.Enum; // Leaving generic Enum usage if needed for comparison, but relying on StateMachine
+using Order.API.Common.Enum;
+using SharedKernels.Abstractions.Messaging; // Leaving generic Enum usage if needed for comparison, but relying on StateMachine
 
 namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
 {
-    public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatusCommand, Result<bool>>
+    public class UpdateOrderStatusCommandHandler : ICommandHandler<UpdateOrderStatusCommand, bool>
     {
         private readonly AppDbContext _context;
 
@@ -22,7 +23,7 @@ namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
             var orderHeader = await _context.OrderHeaders.FirstOrDefaultAsync(o => o.Id == request.orderId, cancellationToken);
 
             if (orderHeader is null)
-                return Result.Failure<bool>("Order not found");
+                return Result.Failure<bool>("");
 
             if (request.newStatus == StatusEnum.Status_Cancelled)
             {
@@ -45,7 +46,8 @@ namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
                 }
                 else
                 {
-                     return Result.Failure<bool>($"Cannot cancel order in state {orderHeader.OrderState}");
+                     Error OrderCanotBeCanceled = new("500", $"Cannot cancel order in state {orderHeader.OrderState}", SharedKernels.ErrorType.Failure);
+                     return Result.Failure<bool>(OrderCanotBeCanceled);
                 }
             }
             // Add other status handling if needed
@@ -53,5 +55,8 @@ namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success(true);
         }
+
+        private Error OrderNotFoundError => new("401", "Order not found", SharedKernels.ErrorType.NotFound);
+        
     }
 }

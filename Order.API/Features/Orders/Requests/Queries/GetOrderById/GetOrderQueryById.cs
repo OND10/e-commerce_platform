@@ -1,10 +1,11 @@
 ﻿using MediatR;
-using SharedKernel.Results;
+using SharedKernels.Results;
 using Order.API.Features.Orders.Dtos.Response;
+using SharedKernels.Abstractions.Messaging;
 
 namespace Order.API.Features.Orders.Requests.Queries.GetOrderById
 {
-    public class GetOrderQueryById : IRequest<Result<OrderHeaderResponseDto>>
+    public class GetOrderQueryById : IQuery<OrderHeaderResponseDto>
     {
         public int orderId { get; set; }
     }

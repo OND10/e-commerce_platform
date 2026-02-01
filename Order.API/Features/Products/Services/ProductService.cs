@@ -1,4 +1,4 @@
-﻿using SharedKernel.Results;
+﻿using SharedKernels.Results;
 using Newtonsoft.Json;
 using Order.API.Features.Products.Dtos.Response;
 namespace Order.API.Features.Products.Services

@@ -1,4 +1,4 @@
-using SharedKernel.Domain;
+using SharedKernels.Domain;
 
 namespace Product.API.Domain.Events;
 

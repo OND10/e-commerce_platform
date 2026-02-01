@@ -1,15 +1,15 @@
-﻿using MediatR;
-using SharedKernel.Results;
+﻿using SharedKernels.Results;
 using Order.API.DataBase;
 using Order.API.Entities;
 using Order.API.Features.Orders.Dtos.Response;
 using Order.API.Features.Orders.Services.Interface;
 using Order.API.Features.Orders.Services.Implementation;
 using Microsoft.EntityFrameworkCore;
+using SharedKernels.Abstractions.Messaging;
 
 namespace Order.API.Features.Orders.Requests.Commands.AddOrder
 {
-    public class AddOrderCommandHandler : IRequestHandler<AddOrderCommand, Result<OrderHeaderResponseDto>>
+    public class AddOrderCommandHandler : ICommandHandler<AddOrderCommand, OrderHeaderResponseDto>
     {
         private readonly AppDbContext _context;
         private readonly IOrderService _orderService;
@@ -30,7 +30,7 @@ namespace Order.API.Features.Orders.Requests.Commands.AddOrder
 
                 if (!processOrder.CartHeaderResponse.isValid)
                 {
-                     return Result.Failure<OrderHeaderResponseDto>("Placing Order failed: Validation error");
+                     return Result.Failure<OrderHeaderResponseDto>(OrderValidationError);
                 }
 
                 var cartHeader = request.cartDto.CartHeaderResponse;
@@ -76,8 +76,12 @@ namespace Order.API.Features.Orders.Requests.Commands.AddOrder
             }
             catch (Exception ex)
             {
-                return Result.Failure<OrderHeaderResponseDto>(ex.Message);
+                
+                Error OrderExceptionError = new("500", ex.Message, SharedKernels.ErrorType.Problem);
+                return Result.Failure<OrderHeaderResponseDto>(OrderExceptionError);
             }
         }
+
+        private Error OrderValidationError => new("500", "Placing Order failed: Validation error", SharedKernels.ErrorType.Validation);
     }
 }
