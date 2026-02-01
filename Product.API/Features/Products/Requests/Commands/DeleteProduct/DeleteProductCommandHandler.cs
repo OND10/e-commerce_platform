@@ -1,27 +1,26 @@
-﻿using MediatR;
-using Product.API.Common.Handler;
+﻿using SharedKernel.Abstractions.Messaging;
+using SharedKernel.Results;
 using Product.API.Features.Products.Repository.Interface;
 
 namespace Product.API.Features.Products.Requests.Commands.DeleteProduct
 {
-    public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result<bool>>
+    public class DeleteProductCommandHandler : ICommandHandler<DeleteProductCommand, bool>
     {
+        private readonly IProductRepository _productRepository;
 
-        private readonly IProductRepository _repository;
-        private readonly IUnitofWork _unitofWork;
-        public DeleteProductCommandHandler(IProductRepository repository, IUnitofWork unitofWork)
+        public DeleteProductCommandHandler(IProductRepository productRepository)
         {
-            _repository = repository;
-            _unitofWork = unitofWork;
-
+            _productRepository = productRepository;
         }
 
         public async Task<Result<bool>> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
-
-            var result = await _repository.DeleteAsync(request.Id);
-            await _unitofWork.SaveChangesAsync();
-            return await Result<bool>.SuccessAsync(true, "Deleted Successfully", true);
+             var result = await _productRepository.DeleteAsync(request.Id);
+             if (result)
+             {
+                 return Result.Success(true);
+             }
+             return Result.Failure<bool>(Error.NotFound("Product.NotFound", "Product not found or delete failed"));
         }
     }
 }

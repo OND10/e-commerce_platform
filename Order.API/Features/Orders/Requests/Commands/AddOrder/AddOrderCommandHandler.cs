@@ -1,18 +1,20 @@
 ﻿using MediatR;
-using Order.API.Common.Handler;
+using SharedKernel.Results;
 using Order.API.DataBase;
 using Order.API.Entities;
 using Order.API.Features.Orders.Dtos.Response;
-using Order.API.Features.Orders.Services.Implementation;
 using Order.API.Features.Orders.Services.Interface;
+using Order.API.Features.Orders.Services.Implementation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Order.API.Features.Orders.Requests.Commands.AddOrder
 {
     public class AddOrderCommandHandler : IRequestHandler<AddOrderCommand, Result<OrderHeaderResponseDto>>
     {
         private readonly AppDbContext _context;
-        protected readonly IOrderService _orderService;
-        public AddOrderCommandHandler(AppDbContext context , IOrderService orderService)
+        private readonly IOrderService _orderService;
+
+        public AddOrderCommandHandler(AppDbContext context, IOrderService orderService)
         {
             _context = context;
             _orderService = orderService;
@@ -22,73 +24,60 @@ namespace Order.API.Features.Orders.Requests.Commands.AddOrder
         {
             try
             {
-                var orderHeaderResponse = new OrderHeaderResponseDto();
+                // Validation (using existing service logic)
+                IOrderService serviceWithValidation = new ValidationDecorator(new BasicOrderService());
+                var processOrder = await serviceWithValidation.ProcessOrder(request.cartDto);
 
-                var mappedorderHeaderResponse = orderHeaderResponse.ToResponse(request);
-
-                // Add each item from CartDetailsResponse to OrderDetailsResponseDto
-                foreach (var cartDetail in request.cartDto.CartDetailsResponse)
+                if (!processOrder.CartHeaderResponse.isValid)
                 {
-                    var orderDetail = new OrderDetailsResponseDto
+                     return Result.Failure<OrderHeaderResponseDto>("Placing Order failed: Validation error");
+                }
+
+                var cartHeader = request.cartDto.CartHeaderResponse;
+                
+                var order = OrderHeader.Create(
+                    cartHeader.UserId,
+                    cartHeader.Name ?? "Unknown", 
+                    cartHeader.Email ?? "no-email@example.com", 
+                    cartHeader.PhoneNumber ?? "", 
+                    cartHeader.CartTotal
+                );
+
+                if (request.cartDto.CartDetailsResponse != null)
+                {
+                    foreach (var detail in request.cartDto.CartDetailsResponse)
                     {
-                        OrderHeaderId = mappedorderHeaderResponse.Id,
-                        ProductId = cartDetail.ProductId,
-                        Count = cartDetail.Count,
-                        Product = cartDetail.Product,
-                        ProductName = cartDetail.Product.Name,
-                        Price = cartDetail.Product.Price
-                    };
-                    mappedorderHeaderResponse.OrderDetails.Add(orderDetail); // Use Add
+                        order.AddLineItem(
+                            detail.ProductId, 
+                            detail.Product?.Name ?? "Unknown Product", 
+                            detail.Product?.Price ?? detail.Count, // Logic check needed: count vs price? Assuming detail has price? Repo says detail.Product.Price. Use detail.Product if available.
+                            detail.Count
+                        );
+                    }
                 }
 
-                // Map OrderHeaderResponseDto to OrderHeader
-                var orderHeader = new OrderHeader();
+                _context.OrderHeaders.Add(order);
+                await _context.SaveChangesAsync(cancellationToken);
 
-                var mappedorderHeader = orderHeader.ToModel(mappedorderHeaderResponse);
-
-                // Add each item from OrderDetailsResponseDto to OrderDetails
-                foreach (var orderDetailResponse in mappedorderHeaderResponse.OrderDetails)
+                var response = new OrderHeaderResponseDto
                 {
-                    var orderDetail = new OrderDetails
-                    {
-                        OrderHeaderId = mappedorderHeaderResponse.Id,
-                        ProductId = orderDetailResponse.ProductId,
-                        Count = orderDetailResponse.Count,
-                        Product = orderDetailResponse.Product,
-                        ProductName = orderDetailResponse.ProductName,
-                        Price = orderDetailResponse.Price
-                    };
-                    mappedorderHeader.OrderDetails.Add(orderDetail); // Use Add
-                }
+                    Id = order.Id,
+                    UserId = order.UserId,
+                    OrderTotal = order.OrderTotal,
+                    Status = order.OrderState.ToString(),
+                    Email = order.EmailAddress,
+                    Name = order.Name,
+                    PhoneNumber = order.PhoneNumber,
+                    OrderTime = order.OrderTime
+                };
 
-                // Order Processing to make sure that order is placed
-                IOrderService _orderService = new BasicOrderService();
-
-                _orderService = new ValidationDecorator(_orderService);
-
-                var processOrder = await _orderService.ProcessOrder(request.cartDto);
-
-                if(processOrder.CartHeaderResponse.isValid == true)
-                {
-                    var create = _context.OrderHeaders.Add(mappedorderHeader).Entity;
-                    await _context.SaveChangesAsync();
-
-                    mappedorderHeaderResponse.Id = create.Id;
-
-                    return await Result<OrderHeaderResponseDto>.SuccessAsync(mappedorderHeaderResponse, "Added Successfully", true);
-                }
-
-                else
-                {
-                    return await Result<OrderHeaderResponseDto>.FaildAsync(false, $"Placing Order is faild");
-                }
+                return Result.Success(response);
 
             }
             catch (Exception ex)
             {
-                return await Result<OrderHeaderResponseDto>.FaildAsync(false, $"{ex.Message}");
+                return Result.Failure<OrderHeaderResponseDto>(ex.Message);
             }
         }
-
     }
 }

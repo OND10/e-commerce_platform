@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Order.API.Common.Enum;
-using Order.API.Common.Handler;
+using SharedKernel.Results;
+using Order.API.Entities;
 using Order.API.DataBase;
-using Order.API.Features.Orders.Dtos.Response;
 using Stripe;
+using Order.API.Common.Enum; // Leaving generic Enum usage if needed for comparison, but relying on StateMachine
 
 namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
 {
@@ -19,31 +19,39 @@ namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
 
         public async Task<Result<bool>> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
         {
-            var orderHeader = await _context.OrderHeaders.FirstAsync(o => o.Id == request.orderId);
+            var orderHeader = await _context.OrderHeaders.FirstOrDefaultAsync(o => o.Id == request.orderId, cancellationToken);
 
-            if (orderHeader is not null)
+            if (orderHeader is null)
+                return Result.Failure<bool>("Order not found");
+
+            if (request.newStatus == StatusEnum.Status_Cancelled)
             {
-                if (request.newStatus == StatusEnum.Status_Cancelled)
+                var stateMachine = new OrderStateMachine(orderHeader, () => true);
+                
+                if (stateMachine.CanFire(OrderTrigger.Cancel))
                 {
-                    // giving refund
-                    var options = new RefundCreateOptions
+                    stateMachine.Fire(OrderTrigger.Cancel);
+                    
+                    if (!string.IsNullOrEmpty(orderHeader.PaymentIntentId))
                     {
-                        Reason = RefundReasons.RequestedByCustomer,
-                        PaymentIntent = orderHeader.PaymentIntentId,
-
-                    };
-
-                    var service = new RefundService();
-                    Refund refund = await service.CreateAsync(options);
+                        var options = new RefundCreateOptions
+                        {
+                            Reason = RefundReasons.RequestedByCustomer,
+                            PaymentIntent = orderHeader.PaymentIntentId,
+                        };
+                        var service = new RefundService();
+                        await service.CreateAsync(options, cancellationToken: cancellationToken);
+                    }
                 }
-
-                orderHeader.Status = request.newStatus;
-                await _context.SaveChangesAsync();
-
-                return await Result<bool>.SuccessAsync(true, "OrderStatus is updated Successfully", true);
+                else
+                {
+                     return Result.Failure<bool>($"Cannot cancel order in state {orderHeader.OrderState}");
+                }
             }
+            // Add other status handling if needed
 
-            return await Result<bool>.FaildAsync(false, "OrderStatus is not updated");
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result.Success(true);
         }
     }
 }

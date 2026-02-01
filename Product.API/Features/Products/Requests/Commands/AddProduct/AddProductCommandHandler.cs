@@ -1,33 +1,44 @@
-﻿using MediatR;
-using OnMapper;
-using Product.API.Common.Handler;
+﻿using SharedKernel.Abstractions.Messaging;
+using SharedKernel.Results;
 using Product.API.Features.Products.DTOs;
 using Product.API.Features.Products.Repository.Interface;
+using AutoMapper;
 
 namespace Product.API.Features.Products.Requests.Commands.AddProduct
 {
-    public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Result<ProductResponseDto>>
+    public class AddProductCommandHandler : ICommandHandler<AddProductCommand, ProductResponseDto>
     {
+        private readonly IProductRepository _productRepository;
+        private readonly IMapper _mapper;
 
-        private readonly IProductRepository _repository;
-        private readonly IUnitofWork _unitofWork;
-        private readonly OnMapping _mapper;
-        public AddProductCommandHandler(IProductRepository repository, IUnitofWork unitofWork, OnMapping mapper)
+        public AddProductCommandHandler(IProductRepository productRepository, IMapper mapper)
         {
-            _repository = repository;
-            _unitofWork = unitofWork;
+            _productRepository = productRepository;
             _mapper = mapper;
-
         }
 
         public async Task<Result<ProductResponseDto>> Handle(AddProductCommand request, CancellationToken cancellationToken)
         {
-            var model = await _mapper.Map<AddProductCommand, Product.API.Entities.Product>(request);
-            var result = await _repository.CreateAsync(model.Data);
-            await _unitofWork.SaveChangesAsync();
-            var mappedResult = await _mapper.Map<Product.API.Entities.Product, ProductResponseDto>(result);
+            // Use factory method to create product with validation
+            var productResult = Entities.Product.Create(
+                name: request.Name,
+                description: request.Description,
+                price: (decimal)request.Price,
+                stock: request.NumberofProduct,
+                category: request.Category,
+                imageUrl: request.ImageUrl
+            );
 
-            return await Result<ProductResponseDto>.SuccessAsync(mappedResult.Data, "Viewed Successfully", true);
+            if (productResult.IsFailure)
+                return Result.Failure<ProductResponseDto>(productResult.Error);
+
+            // Save to repository
+            var createdProduct = await _productRepository.CreateAsync(productResult.Value);
+            
+            // Map to response DTO
+            var response = _mapper.Map<ProductResponseDto>(createdProduct);
+            
+            return Result.Success(response);
         }
     }
 }

@@ -1,10 +1,11 @@
-﻿using MediatR;
-using Product.API.Common.Handler;
+﻿using SharedKernel.Abstractions.Messaging;
+using SharedKernel.Results;
 using Product.API.Features.Products.DTOs;
+using System.Collections.Generic;
 
 namespace Product.API.Features.Products.Requests.Queries.GetProducts
 {
-    public class GetProductQuery : IRequest<Result<IEnumerable<ProductResponseDto>>>
+    public class GetProductQuery : IQuery<IEnumerable<ProductResponseDto>>
     {
     }
 }

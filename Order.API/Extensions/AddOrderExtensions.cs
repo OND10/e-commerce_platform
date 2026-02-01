@@ -1,7 +1,5 @@
-﻿using MessageBus.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using OnMapper;
 using Order.API.Features.Orders.Services.Implementation;
 using Order.API.Features.Orders.Services.Interface;
 using Order.API.Features.Products.Services;
@@ -40,10 +38,9 @@ namespace Order.API.Extensions
                 };
             });
 
-            builder.Services.AddScoped<OnMapping>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IOrderService, BasicOrderService>();
-            builder.Services.AddScoped<IMessageBusService, MessageBusService>();
+            //builder.Services.AddScoped<IMessageBusService, MessageBusService>(); // Removed
             builder.Services.AddAutoMapper(typeof(Program));
             var assembly = Assembly.GetExecutingAssembly();
             builder.Services.AddMediatR(cfg =>

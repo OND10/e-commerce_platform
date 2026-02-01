@@ -1,20 +1,41 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SharedKernel.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
 using Order.API.Features.Products.Dtos.Response;
+
 namespace Order.API.Entities
 {
-    public class OrderDetails
+    // Renamed to Item for clarity, or kept as OrderDetails but as child entity
+    public class OrderDetails : Entity
     {
-        [Key]
-        public int Id { get; set; }
-        public int OrderHeaderId { get; set; }
-        [ForeignKey(nameof(OrderHeaderId))]
-        public OrderHeader? OrderHeader { get; set; }
-        public int ProductId { get; set; }
+        public int OrderHeaderId { get; private set; }
+        // Navigation - removing standard public setter. 
+        // EF Core can set this via backing field or constructor if configured, 
+        // but typically child entities don't strictly need navigation back to parent 
+        // if treated as part of aggregate. Keeping for EF convenience.
+        public OrderHeader? OrderHeader { get; set; } // Settable for EF Core or via FK
+        
+        public int ProductId { get; private set; }
+        
         [NotMapped]
-        public ProductResponseDto? Product { get; set; }
-        public int Count { get; set; }
-        public string ProductName {  get; set; }
-        public double? Price { get; set; }
+        public ProductResponseDto? Product { get; private set; } // Kept from original, might be DTO projection
+        
+        public int Count { get; private set; }
+        public string ProductName { get; private set; }
+        public double? Price { get; private set; }
+
+        private OrderDetails() { }
+
+        public OrderDetails(int productId, string productName, double price, int count)
+        {
+            ProductId = productId;
+            ProductName = productName;
+            Price = price;
+            Count = count;
+        }
+
+        public void SetProductDto(ProductResponseDto dto)
+        {
+            Product = dto;
+        }
     }
 }
