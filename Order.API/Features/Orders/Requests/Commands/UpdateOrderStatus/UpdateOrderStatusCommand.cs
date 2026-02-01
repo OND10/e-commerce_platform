@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Common.BuildingBlocks.Results;
+using SharedKernel.Results;
 
 namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
 {

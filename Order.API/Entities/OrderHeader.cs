@@ -1,5 +1,5 @@
-﻿using Common.BuildingBlocks.Domain;
-using Common.BuildingBlocks.Domain.ValueObjects;
+﻿using SharedKernel.Domain;
+using SharedKernel.Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using Order.API.Features.Orders.Events;

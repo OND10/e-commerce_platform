@@ -1,10 +1,10 @@
-﻿using MediatR;
-using Common.BuildingBlocks.Results;
+﻿using SharedKernel.Abstractions.Messaging;
+using SharedKernel.Results;
 using Product.API.Features.Products.Repository.Interface;
 
 namespace Product.API.Features.Products.Requests.Commands.DeleteProduct
 {
-    public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result<bool>>
+    public class DeleteProductCommandHandler : ICommandHandler<DeleteProductCommand, bool>
     {
         private readonly IProductRepository _productRepository;
 
@@ -20,7 +20,7 @@ namespace Product.API.Features.Products.Requests.Commands.DeleteProduct
              {
                  return Result.Success(true);
              }
-             return Result.Failure<bool>("Product not found or delete failed");
+             return Result.Failure<bool>(Error.NotFound("Product.NotFound", "Product not found or delete failed"));
         }
     }
 }

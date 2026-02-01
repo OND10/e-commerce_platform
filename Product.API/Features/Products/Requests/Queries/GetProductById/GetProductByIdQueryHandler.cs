@@ -1,14 +1,14 @@
-﻿using MediatR;
-using Common.BuildingBlocks.Results;
+﻿using SharedKernel.Abstractions.Messaging;
+using SharedKernel.Results;
 using Product.API.Features.Products.DTOs;
 using Product.API.Features.Products.Repository.Interface;
 using AutoMapper;
 
 namespace Product.API.Features.Products.Requests.Queries.GetProductById
 {
-    public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, Result<ProductResponseDto>>
+    public class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, ProductResponseDto>
     {
-         private readonly IProductRepository _productRepository;
+        private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
 
         public GetProductByIdQueryHandler(IProductRepository productRepository, IMapper mapper)
@@ -22,7 +22,7 @@ namespace Product.API.Features.Products.Requests.Queries.GetProductById
             var product = await _productRepository.GetByIdAsync(request.Id);
             if (product == null)
             {
-                 return Result.Failure<ProductResponseDto>("Product not found");
+                 return Result.Failure<ProductResponseDto>(Error.NotFound("Product.NotFound", "Product not found"));
             }
             var response = _mapper.Map<ProductResponseDto>(product);
             return Result.Success(response);

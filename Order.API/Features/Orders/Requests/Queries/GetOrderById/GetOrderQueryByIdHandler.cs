@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Common.BuildingBlocks.Results;
+using SharedKernel.Results;
 using Order.API.DataBase;
 using Order.API.Features.Orders.Dtos.Response;
 

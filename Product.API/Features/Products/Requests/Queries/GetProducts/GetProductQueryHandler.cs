@@ -1,5 +1,5 @@
-﻿using MediatR;
-using Common.BuildingBlocks.Results;
+﻿using SharedKernel.Abstractions.Messaging;
+using SharedKernel.Results;
 using Product.API.Features.Products.DTOs;
 using Product.API.Features.Products.Repository.Interface;
 using AutoMapper;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Product.API.Features.Products.Requests.Queries.GetProducts
 {
-    public class GetProductQueryHandler : IRequestHandler<GetProductQuery, Result<IEnumerable<ProductResponseDto>>>
+    public class GetProductQueryHandler : IQueryHandler<GetProductQuery, IEnumerable<ProductResponseDto>>
     {
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;

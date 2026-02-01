@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using Common.BuildingBlocks.Messaging; // Use IEventBus
-using Common.BuildingBlocks.Results;
+using SharedKernel.Messaging; // Use IEventBus
+using SharedKernel.Results;
 using Microsoft.EntityFrameworkCore;
 using Order.API.Entities;
 using Order.API.DataBase;

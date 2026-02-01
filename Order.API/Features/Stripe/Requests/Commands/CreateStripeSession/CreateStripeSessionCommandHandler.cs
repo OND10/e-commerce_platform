@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Common.BuildingBlocks.Results;
+using SharedKernel.Results;
 using Order.API.DataBase;
 using Order.API.Entities;
 using Order.API.Features.Stripe.Dtos.Request;

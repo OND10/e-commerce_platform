@@ -1,4 +1,4 @@
-using Common.BuildingBlocks.StateManagement;
+using SharedKernel.StateManagement;
 using System;
 using System.Collections.Generic;
 

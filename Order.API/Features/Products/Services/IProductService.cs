@@ -1,4 +1,4 @@
-﻿using Common.BuildingBlocks.Results;
+﻿using SharedKernel.Results;
 using Order.API.Features.Products.Dtos.Response;
 namespace Order.API.Features.Products.Services;
 

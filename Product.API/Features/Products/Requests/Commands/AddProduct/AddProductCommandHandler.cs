@@ -1,12 +1,12 @@
-﻿using MediatR;
-using Common.BuildingBlocks.Results;
+﻿using SharedKernel.Abstractions.Messaging;
+using SharedKernel.Results;
 using Product.API.Features.Products.DTOs;
 using Product.API.Features.Products.Repository.Interface;
 using AutoMapper;
 
 namespace Product.API.Features.Products.Requests.Commands.AddProduct
 {
-    public class AddProductCommandHandler : IRequestHandler<AddProductCommand, Result<ProductResponseDto>>
+    public class AddProductCommandHandler : ICommandHandler<AddProductCommand, ProductResponseDto>
     {
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
@@ -19,17 +19,23 @@ namespace Product.API.Features.Products.Requests.Commands.AddProduct
 
         public async Task<Result<ProductResponseDto>> Handle(AddProductCommand request, CancellationToken cancellationToken)
         {
-            var product = new Entities.Product
-            {
-                Name = request.Name,
-                Description = request.Description,
-                NumberofProduct = request.NumberofProduct,
-                Category = request.Category,
-                Price = request.Price,
-                ImageUrl = request.ImageUrl
-            };
+            // Use factory method to create product with validation
+            var productResult = Entities.Product.Create(
+                name: request.Name,
+                description: request.Description,
+                price: (decimal)request.Price,
+                stock: request.NumberofProduct,
+                category: request.Category,
+                imageUrl: request.ImageUrl
+            );
 
-            var createdProduct = await _productRepository.CreateAsync(product);
+            if (productResult.IsFailure)
+                return Result.Failure<ProductResponseDto>(productResult.Error);
+
+            // Save to repository
+            var createdProduct = await _productRepository.CreateAsync(productResult.Value);
+            
+            // Map to response DTO
             var response = _mapper.Map<ProductResponseDto>(createdProduct);
             
             return Result.Success(response);

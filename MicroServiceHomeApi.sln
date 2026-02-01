@@ -36,7 +36,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rewards.API", "Rewards.API\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Gateway", "Api.Gateway\Api.Gateway.csproj", "{015FCCDE-549C-4F28-8ABD-47AC7024B2D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.BuildingBlocks", "Common.BuildingBlocks\Common.BuildingBlocks.csproj", "{7FFEF9B0-BB5B-4DFC-9959-389D6C1C9926}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedKernel", "SharedKernel\SharedKernel.csproj", "{7FFEF9B0-BB5B-4DFC-9959-389D6C1C9926}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

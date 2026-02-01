@@ -1,4 +1,4 @@
-﻿using Common.BuildingBlocks.Domain;
+﻿using SharedKernel.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
 using Order.API.Features.Products.Dtos.Response;
 

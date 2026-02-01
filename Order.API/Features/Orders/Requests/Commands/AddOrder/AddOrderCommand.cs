@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Common.BuildingBlocks.Results;
+using SharedKernel.Results;
 using Order.API.Features.Orders.Dtos.Request;
 using Order.API.Features.Orders.Dtos.Response;
 using Order.API.Features.Dtos.Request; 

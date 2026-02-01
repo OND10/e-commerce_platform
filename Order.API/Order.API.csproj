@@ -33,7 +33,7 @@
 
   <ItemGroup><!-- Removed MessageBus -->
   
-    <ProjectReference Include="..\Common.BuildingBlocks\Common.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

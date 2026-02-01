@@ -16,10 +16,10 @@ namespace ShoppingCart.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.24")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Product.API.Entities.Product", b =>
                 {
@@ -27,29 +27,25 @@ namespace ShoppingCart.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("NumberofProduct")
+                    b.Property<int>("Stock")
                         .HasColumnType("int");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -60,52 +56,110 @@ namespace ShoppingCart.API.Migrations
                         {
                             Id = 1,
                             Category = "Phones",
-                            Description = "Description about products",
+                            Description = "The latest iPhone with titanium design.",
                             ImageUrl = "https://placehold.co/603x403",
-                            Name = "Product1",
-                            NumberofProduct = 0,
-                            Price = 15.0
+                            Name = "IPhone 15 Pro Max",
+                            Stock = 10
                         },
                         new
                         {
                             Id = 2,
                             Category = "Phones",
-                            Description = "Description about products",
+                            Description = "AI-powered smartphone.",
                             ImageUrl = "https://placehold.co/603x403",
-                            Name = "Product2",
-                            NumberofProduct = 0,
-                            Price = 45.0
+                            Name = "Samsung Galaxy S24 Ultra",
+                            Stock = 15
                         },
                         new
                         {
                             Id = 3,
-                            Category = "Phones",
-                            Description = "Description about products",
+                            Category = "Laptops",
+                            Description = "M3 Pro chip laptop.",
                             ImageUrl = "https://placehold.co/603x403",
-                            Name = "Product3",
-                            NumberofProduct = 0,
-                            Price = 60.0
+                            Name = "MacBook Pro 14",
+                            Stock = 5
                         },
                         new
                         {
                             Id = 4,
-                            Category = "Phones",
-                            Description = "Description about products",
+                            Category = "Audio",
+                            Description = "Noise cancelling headphones.",
                             ImageUrl = "https://placehold.co/603x403",
-                            Name = "Product4",
-                            NumberofProduct = 0,
-                            Price = 136.0
+                            Name = "Sony WH-1000XM5",
+                            Stock = 20
                         },
                         new
                         {
                             Id = 5,
-                            Category = "Phones",
-                            Description = "Description about products",
+                            Category = "Tablets",
+                            Description = "M1 chip tablet.",
                             ImageUrl = "https://placehold.co/603x403",
-                            Name = "Product5",
-                            NumberofProduct = 0,
-                            Price = 6.0
+                            Name = "iPad Air 5",
+                            Stock = 8
                         });
+                });
+
+            modelBuilder.Entity("Product.API.Entities.Product", b =>
+                {
+                    b.OwnsOne("Product.API.Domain.ValueObjects.Money", "Price", b1 =>
+                        {
+                            b1.Property<int>("ProductId")
+                                .HasColumnType("int");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Price");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .ValueGeneratedOnAdd()
+                                .HasMaxLength(3)
+                                .HasColumnType("nvarchar(3)")
+                                .HasDefaultValue("USD")
+                                .HasColumnName("Currency");
+
+                            b1.HasKey("ProductId");
+
+                            b1.ToTable("Products");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId");
+
+                            b1.HasData(
+                                new
+                                {
+                                    ProductId = 1,
+                                    Amount = 1199m,
+                                    Currency = "USD"
+                                },
+                                new
+                                {
+                                    ProductId = 2,
+                                    Amount = 1299m,
+                                    Currency = "USD"
+                                },
+                                new
+                                {
+                                    ProductId = 3,
+                                    Amount = 1999m,
+                                    Currency = "USD"
+                                },
+                                new
+                                {
+                                    ProductId = 4,
+                                    Amount = 348m,
+                                    Currency = "USD"
+                                },
+                                new
+                                {
+                                    ProductId = 5,
+                                    Amount = 599m,
+                                    Currency = "USD"
+                                });
+                        });
+
+                    b.Navigation("Price")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
