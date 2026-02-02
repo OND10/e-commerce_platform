@@ -7,14 +7,15 @@ using ShoppingCart.API.Features.DTOs.CartDetailsDTOs.Response;
 using ShoppingCart.API.Features.DTOs.CartDTOs;
 using ShoppingCart.API.Features.DTOs.CartHeaderDTOs.Response;
 using ShoppingCart.API.DataBase;
+using OnMapper.Services.Interfaces;
 
 namespace ShoppingCart.API.Features.Carts.Requests.Command.AddCart
 {
     public class AddCartCommandHandler : IRequestHandler<AddCartCommand, Result<CartDto>>
     {
         private readonly AppDbContext _context;
-        private readonly OnMapping _mapper;
-        public AddCartCommandHandler(AppDbContext context, OnMapping mapper)
+        private readonly IMappingService _mapper;
+        public AddCartCommandHandler(AppDbContext context, IMappingService mapper)
         {
             _context = context;
             _mapper = mapper;

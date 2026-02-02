@@ -52,7 +52,7 @@ namespace Service.Coupons.Api.Controllers
 
         //POST api/<CouponController>
         [HttpPost]
-        public async Task<Result<CouponResponseDTO>> Post([FromBody] CouponRequestDTO model)
+        public async Task<IActionResult> Post([FromBody] CouponRequestDTO model)
         {
             try
             {
@@ -86,12 +86,11 @@ namespace Service.Coupons.Api.Controllers
                 // Log created coupon details
                 Console.WriteLine($"Created Stripe Coupon: {stripeCoupon.Id}");
 
-                return await Result<CouponResponseDTO>.SuccessAsync(add.Data, "Created Successfully", true);
+                return Ok();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating coupon: {ex.Message}");
-                throw new ArgumentNullException(nameof(model), ex);
+                return BadRequest(ex);
             }
 
 
@@ -102,7 +101,7 @@ namespace Service.Coupons.Api.Controllers
         [HttpPut]
         [Route("{id:int}")]
         [Authorize(Roles = "ADMIN")]
-        public async Task<Result<CouponResponseDTO>> Put([FromRoute] int id, [FromBody] CouponRequestDTO model)
+        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] CouponRequestDTO model)
         {
             try
             {
@@ -110,25 +109,25 @@ namespace Service.Coupons.Api.Controllers
                 var mappedRequestModel = await mapper.Map<CouponRequestDTO, UpdateCouponRequestDTO>(model);
                 mappedRequestModel.Data.CouponId = id;
                 var updateResult = await _service.UpdateAsync(mappedRequestModel.Data);
-                return await Result<CouponResponseDTO>.SuccessAsync(updateResult.Data, "Updated Successfully", true);
+                return Ok(updateResult);
             }
             catch (Exception)
             {
-                return await Result<CouponResponseDTO>.FaildAsync(true, "Not Updated");
+                return BadRequest();
             }
         }
 
         // DELETE api/<CouponController>/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<Result<bool>> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 var delete = await _service.GetByIdAsync(id);
                 if (delete == null)
                 {
-                    return await Result<bool>.FaildAsync(false, "Not Deleted");
+                    return NotFound();
                 }
 
                 var stripeCouponId = delete.Data.StripeCouponId;  // Use the Stripe Coupon ID
@@ -142,19 +141,17 @@ namespace Service.Coupons.Api.Controllers
                 // Log delete response
                 Console.WriteLine($"Deleted Stripe Coupon: {stripeDeleteResponse.Id}");
 
-                return await Result<bool>.SuccessAsync(result.Data, "Deleted Successfully", true);
+                return Ok(result);
             }
             catch (StripeException stripeEx)
             {
                 // Log Stripe-specific exceptions
                 Console.WriteLine($"Stripe error: {stripeEx.Message}");
-                throw;
+                return BadRequest(stripeEx);
             }
             catch (Exception ex)
             {
-                // Log other exceptions
-                Console.WriteLine($"General error: {ex.Message}");
-                throw new ArgumentNullException(nameof(id), ex);
+                return BadRequest(ex.Message);
             }
 
         }

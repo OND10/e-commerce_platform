@@ -44,7 +44,7 @@ namespace Order.API.Entities
                 OrderState = OrderState.Created
             };
             
-            order.AddDomainEvent(new OrderCreatedDomainEvent(order));
+            order.Raise(new OrderCreatedDomainEvent(order));
             
             return order;
         }

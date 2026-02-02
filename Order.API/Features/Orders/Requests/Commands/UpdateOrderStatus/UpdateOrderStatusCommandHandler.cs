@@ -23,7 +23,7 @@ namespace Order.API.Features.Orders.Requests.Commands.UpdateOrderStatus
             var orderHeader = await _context.OrderHeaders.FirstOrDefaultAsync(o => o.Id == request.orderId, cancellationToken);
 
             if (orderHeader is null)
-                return Result.Failure<bool>("");
+                return Result.Failure<bool>(OrderNotFoundError);
 
             if (request.newStatus == StatusEnum.Status_Cancelled)
             {

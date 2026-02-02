@@ -23,11 +23,13 @@ namespace Order.API.Features.Products.Services
                     return responseDto;
                 }
                 // If HTTP status is success but the internal Result indicates failure
-                return Result.Failure<IEnumerable<ProductResponseDto>>(responseDto?.Error.Description ?? "Failed to retrieve products from API.");
+                Error ProductsFetchError = new(response.StatusCode.ToString(), responseDto?.Error.Description, SharedKernels.ErrorType.Failure);
+                return Result.Failure<IEnumerable<ProductResponseDto>>(ProductsFetchError);
             }
             // If HTTP status is not success
             var errorContent = await response.Content.ReadAsStringAsync();
-            return Result.Failure<IEnumerable<ProductResponseDto>>($"API call failed with status code {response.StatusCode}. Details: {errorContent}");
+            Error ApiFailedError = new(response.StatusCode.ToString(), errorContent, SharedKernels.ErrorType.Failure);
+            return Result.Failure<IEnumerable<ProductResponseDto>>(ApiFailedError);
         }
 
     }
